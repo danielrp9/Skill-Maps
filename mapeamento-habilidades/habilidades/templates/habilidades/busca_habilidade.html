@@ -1,0 +1,81 @@
+{% extends "habilidades/base.html" %}
+{% load static %}
+
+{% block title %}Buscar Colaboradores - UFVJM SkillMap{% endblock %}
+
+{% block content %}
+<main class="container mx-auto flex-1 p-4 lg:p-8">
+<section class="mb-8">
+    <div class="flex flex-wrap justify-between gap-3 mb-4">
+        <div class="flex w-full flex-col gap-2">
+            <p class="text-4xl font-black leading-tight tracking-[-0.033em]">Encontre Habilidades na Comunidade</p>
+            <p class="text-text-light/70 dark:text-text-dark/70 text-base font-normal leading-normal">Busque por uma habilidade, nome ou área de interesse para encontrar colaboradores.</p>
+        </div>
+    </div>
+    
+    <form id="search-form" method="GET">
+        <label class="flex flex-col h-14 w-full">
+            <div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark">
+                <div class="flex items-center justify-center pl-4 text-secondary/70 dark:text-primary/70">
+                    <span class="material-symbols-outlined text-2xl">search</span>
+                </div>
+                <input id="search-term" name="termo" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg border-none bg-transparent px-4 pl-2 text-base font-normal leading-normal placeholder:text-text-light/60 dark:placeholder:text-text-dark/60 focus:outline-0 focus:ring-0" placeholder="Busque por uma habilidade, nome ou área de interesse..." value=""/>
+                <button type="submit" class="flex items-center justify-center rounded-r-lg bg-primary px-4 text-white text-sm font-bold transition-colors hover:bg-green-600">
+                    <span class="truncate">Buscar</span>
+                </button>
+            </div>
+        </label>
+    </form>
+</section>
+
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+    <aside class="lg:col-span-3">
+        <div class="sticky top-28 flex flex-col gap-4">
+            <h3 class="font-bold text-lg">Filtros</h3>
+            <div id="filter-container" class="flex flex-col gap-3">
+                
+                <details class="flex flex-col rounded-lg border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark px-4 py-2 group" open="">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-2">
+                        <p class="text-sm font-medium leading-normal">Campus</p>
+                        <div class="transition-transform duration-200 group-open:rotate-180">
+                            <span class="material-symbols-outlined text-xl">expand_more</span>
+                        </div>
+                    </summary>
+                    <div class="flex flex-col gap-2 pb-2 pt-2">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input name="campus" value="DIA" class="form-checkbox rounded border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-primary focus:ring-primary/50" type="checkbox"/>Diamantina
+                        </label>
+                        </div>
+                </details>
+                
+                </div>
+            <button id="clear-filters-btn" class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-sm font-bold leading-normal tracking-[0.015em] border border-border-light dark:border-border-dark hover:bg-input-light dark:hover:bg-input-dark transition-colors">
+                <span class="truncate">Limpar Filtros</span>
+            </button>
+        </div>
+    </aside>
+
+    <section id="results-grid" class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:col-span-9 xl:grid-cols-3">
+        <div class="flex flex-col rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-6 transition-all hover:shadow-lg hover:-translate-y-1">
+            <div class="flex-1">
+                <p class="text-sm font-medium text-text-light/70 dark:text-text-dark/70">Ana Clara Silva</p>
+                <h4 class="text-lg font-bold mt-1">Análise de Dados com Python</h4>
+                <p class="text-sm mt-2 text-text-light/70 dark:text-text-dark/70">Experiência com bibliotecas Pandas, NumPy e Matplotlib...</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">Python</span>
+                </div>
+            </div>
+            <a href="{% url 'perfil_usuario' usuario_id=1 %}" class="mt-6 flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold transition-opacity hover:opacity-90">
+                <span class="truncate">Ver Contato</span>
+            </a>
+        </div>
+        
+        <div id="empty-state" class="hidden flex-col items-center justify-center rounded-xl border-2 border-dashed border-border-light dark:border-border-dark bg-transparent p-6 text-center md:col-span-2 xl:col-span-3">
+            <span class="material-symbols-outlined text-5xl text-text-light/50 dark:text-text-dark/50">search_off</span>
+            <h4 class="text-lg font-bold mt-4">Nenhum resultado encontrado</h4>
+            <p class="text-sm mt-1 max-w-xs text-text-light/70 dark:text-text-dark/70">Tente ajustar seus termos de busca ou limpar os filtros.</p>
+        </div>
+    </section>
+</div>
+</main>
+{% endblock %}

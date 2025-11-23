@@ -1,0 +1,39 @@
+{% extends "habilidades/base.html" %}
+{% load static %}
+
+{% block title %}Login ou Cadastro - SkillMap{% endblock %}
+
+{% block content %}
+<div class="flex w-full max-w-md flex-col items-center justify-center rounded-xl bg-card-light dark:bg-card-dark p-6 shadow-xl">
+    <h1 class="text-3xl font-black tracking-tighter mb-6">Acesse sua Conta</h1>
+    
+    <form method="post" class="w-full flex flex-col gap-4">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="p-3 bg-danger/10 text-danger border border-danger/20 rounded-lg text-sm font-medium">
+                Por favor, corrija os erros abaixo.
+            </div>
+        {% endif %}
+
+        <label class="flex flex-col">
+            <p class="text-base font-medium pb-2">Nome de Usuário:</p>
+            <input name="{{ form.username.name }}" type="text" placeholder="Seu nome de usuário" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal">
+        </label>
+        
+        <label class="flex flex-col">
+            <p class="text-base font-medium pb-2">Senha:</p>
+            <input name="{{ form.password.name }}" type="password" placeholder="Sua senha" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal">
+        </label>
+
+        <button type="submit" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 mt-4 bg-secondary text-white text-base font-bold transition-colors hover:bg-secondary/90">
+            <span class="truncate">Entrar</span>
+        </button>
+
+        <p class="text-sm text-center mt-4">
+            Não tem conta? 
+            <a href="{% url 'cadastro_perfil' %}" class="text-primary font-bold hover:underline">Crie seu Perfil aqui!</a>
+        </p>
+    </form>
+</div>
+{% endblock %}

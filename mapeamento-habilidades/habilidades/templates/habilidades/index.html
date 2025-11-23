@@ -1,16 +1,113 @@
 {% extends "habilidades/base.html" %}
+{% load static %}
 
-{% block title %}Início - SkillMap{% endblock %}
+{% block title %}Conectando Talentos e Oportunidades{% endblock %}
 
 {% block content %}
-    <h1>Bem-vindo ao SkillMap!</h1>
-    <p>Mapeamento de Habilidades para Colaboração Comunitária da UFVJM.</p>
-
-    <div class="search-area">
-        <input type="text" placeholder="Busque por habilidades, projetos ou pessoas...">
-        <button>Buscar</button>
+<div class="layout-content-container flex w-full max-w-6xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
+    
+    <div class="@container">
+        <div class="@[480px]:p-4">
+            <div class="flex min-h-[480px] flex-col items-center justify-center gap-6 rounded-xl bg-cover bg-center bg-no-repeat p-4 @[480px]:gap-8" data-alt="Abstract image representing academic collaboration and networking" style="background-image: linear-gradient(rgba(0, 51, 102, 0.7) 0%, rgba(0, 31, 61, 0.9) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4MmgL83m14SsGrdvWarX1ZMwtIWfAVi2xzkNdWylKd62-x99pf-GSKjC6TBKx_VqYNx62A3liOmQ47JRQp2bOwBm4J2mlWwiuKoCGNWsiDQo59-02P8QprUr5_OdW3R-70mMA_mr_7_RuVNIz68XXyQ_T6ulE07MAinP0ieCKc9m-YMCXVQOfyi-9wl9n4lQIRnaS4xSpGLFDgFYVwqHA9M0v_UU9b2oZdeyts_jfU6lvFNHEPn-gZrR1DDnRt1NfAD0pd4wM2GzB');">
+                <div class="flex flex-col gap-2 text-center">
+                    <h1 class="text-4xl font-black leading-tight tracking-tighter text-white @[480px]:text-5xl">
+                        Conectando Talentos e Oportunidades na UFVJM
+                    </h1>
+                    <h2 class="max-w-3xl text-sm font-normal leading-normal text-gray-200 @[480px]:text-base">
+                        Mapeie suas habilidades, encontre colaboradores e participe de projetos inovadores dentro da nossa comunidade acadêmica.
+                    </h2>
+                </div>
+                
+                <div class="flex w-full max-w-[580px] flex-col">
+                    <form id="hero-search-form" method="GET">
+                        <div class="flex h-14 w-full flex-1 items-stretch rounded-xl shadow-lg @[480px]:h-16">
+                            <div class="flex items-center justify-center rounded-l-xl border-y border-l border-border-light bg-card-light pl-4 dark:border-border-dark dark:bg-card-dark">
+                                <span class="material-symbols-outlined text-text-light/70 dark:text-text-dark/70">search</span>
+                            </div>
+                            <input name="search_term" class="form-input h-full w-full min-w-0 flex-1 resize-none overflow-hidden border-y border-border-light bg-card-light px-4 text-sm font-normal leading-normal text-text-light placeholder:text-text-light/60 focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/50 dark:border-border-dark dark:bg-card-dark dark:text-text-dark dark:placeholder:text-text-dark/60 dark:focus:border-primary @[480px]:text-base" placeholder="Busque por habilidades, projetos ou pessoas..." value=""/>
+                            <div class="flex items-center justify-center rounded-r-xl border-y border-r border-border-light bg-card-light pr-2 dark:border-border-dark dark:bg-card-dark">
+                                <button type="submit" class="flex h-10 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-primary px-4 text-sm font-bold tracking-wide text-white transition-colors hover:bg-green-600 @[480px]:h-12 @[480px]:px-5 @[480px]:text-base">
+                                    <span class="truncate">Buscar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <p>Acesse o painel de administrador: <a href="/admin">/admin</a></p>
-
+    
+    <div class="flex flex-col gap-10 px-0 py-16 @container sm:px-4">
+        <div class="flex flex-col gap-4 text-center">
+            <h2 class="text-3xl font-bold tracking-tight text-text-light dark:text-text-dark @[480px]:text-4xl">
+                Explore a Plataforma
+            </h2>
+            <p class="mx-auto max-w-2xl text-base font-normal leading-normal text-text-light/80 dark:text-text-dark/80">
+                Encontre o que você precisa para tirar suas ideias do papel e colaborar com a comunidade acadêmica.
+            </p>
+        </div>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+            <div class="flex flex-1 flex-col gap-3 rounded-xl border border-border-light bg-card-light p-6 shadow-sm dark:border-border-dark dark:bg-card-dark">
+                <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">group</span>
+                <div class="flex flex-col gap-1">
+                    <h3 class="text-lg font-bold leading-tight">Descubra Talentos</h3>
+                    <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">
+                        Busque por especialistas em diversas áreas para colaborar em seus projetos de pesquisa e extensão.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-1 flex-col gap-3 rounded-xl border border-border-light bg-card-light p-6 shadow-sm dark:border-border-dark dark:bg-card-dark">
+                <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">work</span>
+                <div class="flex flex-col gap-1">
+                    <h3 class="text-lg font-bold leading-tight">Encontre Projetos</h3>
+                    <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">
+                        Navegue por projetos acadêmicos inovadores e encontre oportunidades para aplicar seus conhecimentos.
+                    </p>
+                </div>
+            </div>
+            <div class="flex flex-1 flex-col gap-3 rounded-xl border border-border-light bg-card-light p-6 shadow-sm dark:border-border-dark dark:bg-card-dark">
+                <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">auto_awesome</span>
+                <div class="flex flex-col gap-1">
+                    <h3 class="text-lg font-bold leading-tight">Ofereça suas Habilidades</h3>
+                    <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Cadastre suas competências e seja encontrado por outros membros da comunidade UFVJM.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="rounded-xl bg-card-light dark:bg-card-dark py-16">
+        <div class="flex flex-col gap-10 px-4 sm:px-6 lg:px-8">
+            <h2 class="text-center text-3xl font-bold leading-tight tracking-tight text-text-light dark:text-text-dark">Como Funciona?</h2>
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
+                <div class="flex flex-1 flex-col items-center gap-3 rounded-lg p-4 text-center">
+                    <div class="flex size-14 items-center justify-center rounded-full bg-secondary/10 dark:bg-primary/20">
+                        <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">person_add</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-lg font-bold leading-tight">1. Cadastre-se</h3>
+                        <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Crie seu perfil em poucos minutos para começar a interagir com a plataforma.</p>
+                    </div>
+                </div>
+                <div class="flex flex-1 flex-col items-center gap-3 rounded-lg p-4 text-center">
+                    <div class="flex size-14 items-center justify-center rounded-full bg-secondary/10 dark:bg-primary/20">
+                        <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">checklist</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-lg font-bold leading-tight">2. Mapeie suas Habilidades</h3>
+                        <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Adicione suas competências, interesses e experiências para que outros possam te encontrar.</p>
+                    </div>
+                </div>
+                <div class="flex flex-1 flex-col items-center gap-3 rounded-lg p-4 text-center">
+                    <div class="flex size-14 items-center justify-center rounded-full bg-secondary/10 dark:bg-primary/20">
+                        <span class="material-symbols-outlined text-secondary dark:text-primary" style="font-size: 32px;">hub</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-lg font-bold leading-tight">3. Conecte-se</h3>
+                        <p class="text-sm font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Busque, encontre e inicie colaborações com estudantes, professores e técnicos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

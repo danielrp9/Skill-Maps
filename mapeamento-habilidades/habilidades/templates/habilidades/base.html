@@ -1,34 +1,116 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt-br">
+<html class="light" lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SkillMap{% endblock %}</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}UFVJM SkillMap - Conectando Talentos{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        // Configuração customizada do Tailwind (Cores e Fontes do SkillMap)
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2ECC71", // Green for CTA
+                        "secondary": "#003366", // Institutional Blue
+                        "background-light": "#F4F7F9",
+                        "background-dark": "#0A121A",
+                        "text-light": "#343A40",
+                        "text-dark": "#E0E6F1",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1A2633",
+                        "border-light": "#DDE3E9",
+                        "border-dark": "#334155"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
 
     <link rel="stylesheet" href="{% static 'habilidades/css/style.css' %}">
 
-    </head>
-<body>
-    <header>
-        <nav>
-            <a href="{% url 'index' %}">Início</a> | 
-            <a href="#">Cadastrar Habilidade</a> | 
-            <a href="#">Buscar Habilidade</a> | 
-            <a href="#">Projetos</a> | 
-            <a href="#">Comunidade</a>
-            </nav>
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+
+    <header class="sticky top-0 z-10 flex items-center justify-center border-b border-border-light dark:border-border-dark bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+        <nav class="flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center gap-4">
+                <div class="size-6 text-secondary dark:text-primary">
+                    <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold tracking-tight text-text-light dark:text-text-dark">UFVJM SkillMap</h2>
+            </div>
+            
+            <div class="hidden items-center gap-6 md:flex">
+                <a class="text-sm font-medium hover:text-secondary dark:hover:text-primary" href="{% url 'habilidades:index' %}">Início</a>
+                <a class="text-sm font-medium hover:text-secondary dark:hover:text-primary" href="{% url 'habilidades:cadastro_perfil' %}">Cadastrar Perfil</a>
+                <a class="text-sm font-medium hover:text-secondary dark:hover:text-primary" href="{% url 'habilidades:busca_habilidade' %}">Buscar Habilidade</a>
+                <a class="text-sm font-medium hover:text-secondary dark:hover:text-primary" href="{% url 'habilidades:lista_projetos' %}">Projetos</a>
+                <a class="text-sm font-medium hover:text-secondary dark:hover:text-primary" href="{% url 'habilidades:comunidade' %}">Comunidade</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'habilidades:logout' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-secondary text-white text-sm font-bold tracking-wide transition-colors hover:bg-gray-600">
+                        <span class="truncate">Sair ({{ user.username }})</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'habilidades:login' %}" class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold tracking-wide transition-colors hover:bg-green-600">
+                        <span class="truncate">Login/Registro</span>
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
     </header>
 
-    <main>
+    <main class="flex flex-1 justify-center py-5">
         {% block content %}
         {% endblock %}
     </main>
 
-    <footer>
-        <p>&copy; 2025 SkillMap - UFVJM</p>
+    <footer class="mt-16 border-t border-border-light bg-card-light dark:bg-card-dark">
+        <div class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-6 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center gap-2 sm:items-start">
+                <div class="flex items-center gap-3">
+                    <div class="size-5 text-secondary dark:text-primary">
+                        <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <p class="text-base font-bold text-text-light dark:text-text-dark">UFVJM SkillMap</p>
+                </div>
+                <p class="text-sm text-text-light/70 dark:text-text-dark/70">© 2025 Universidade Federal dos Vales do Jequitinhonha e Mucuri.</p>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium">
+                <a class="hover:text-secondary dark:hover:text-primary" href="#">Sobre a UFVJM</a>
+                <a class="hover:text-secondary dark:hover:text-primary" href="#">Contato</a>
+                <a class="hover:text-secondary dark:hover:text-primary" href="#">Termos de Uso</a>
+                <a class="hover:text-secondary dark:hover:text-primary" href="#">Privacidade</a>
+            </div>
+        </div>
     </footer>
 
-    <script src="{% static 'habilidades/js/main.js' %}"></script>
-    </body>
+</div>
+</div>
+<script src="{% static 'habilidades/js/main.js' %}"></script>
+</body>
 </html>

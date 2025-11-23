@@ -1,0 +1,140 @@
+{% extends "habilidades/base.html" %}
+{% load static %}
+
+{% block title %}Cadastrar Perfil - UFVJM SkillMap{% endblock %}
+
+{% block content %}
+<div class="layout-content-container flex flex-col w-full max-w-4xl flex-1">
+    
+    <form id="registration-form" method="POST">
+        {% csrf_token %}
+        
+        <div class="flex flex-wrap justify-between gap-3 p-4">
+            <div class="flex min-w-72 flex-col gap-2">
+                <h1 class="text-3xl lg:text-4xl font-black tracking-tighter">Cadastre seu Perfil</h1>
+                <p class="text-text-secondary-light dark:text-text-secondary-dark text-base font-normal leading-normal">Compartilhe suas habilidades e encontre oportunidades de colaboração na UFVJM.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-col gap-8 mt-6">
+            
+            <div id="api-message-container" class="mx-4">
+                </div>
+            
+            <div>
+                <h2 class="text-xl font-bold tracking-tight px-4 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Informações de Login e Pessoais</h2>
+                
+                <div class="flex p-4 @container mt-4">
+                    <div class="flex w-full flex-col gap-4 items-start sm:flex-row sm:items-center">
+                        <div class="relative">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-32 w-32 border-2 border-border-light dark:border-border-dark" data-alt="Placeholder image for a user's profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuA913JPreLjYEv4oKsh7OlszmEhB9Qt4f3fDBEhDdxCDtIWo-c96_owUFZKVjXTSGtUBPvmSePuKQOBgCFlUY1Kd6MamDGHbL6F4qVUHOYe7tT3mBaOiifrw2yb8lwF22tfzZrrHgS-AAoY0meTchzdkOL9xfTgulZlOLlXpXis7I-_7nLKl2U6t0Q6EOuA90fvxXTjp1SSfoRXqYYG_O0ixzSn9_bgxNrnioYD6ke7Kq8Z6JNw7KotEIa45Pz6aF2Nl9o1tyi5w5yo");'></div>
+                            <div class="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white cursor-pointer">
+                                <span class="material-symbols-outlined text-lg">upload</span>
+                                <input type="file" id="id_foto_perfil" name="foto_perfil" class="absolute inset-0 opacity-0 cursor-pointer">
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <p class="text-lg font-bold">Foto de Perfil</p>
+                            <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Clique no ícone para carregar uma imagem (PNG ou JPG).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 px-4 py-3">
+                    
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Nome de Usuário <span class="text-danger">*</span></p>
+                        <input name="username" type="text" placeholder="Seu nome de usuário (será usado para login)" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal"/>
+                        <p id="error-username" class="text-danger text-sm mt-1"></p>
+                    </label>
+
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Email <span class="text-danger">*</span></p>
+                        <input name="email" type="email" placeholder="seu.email@ufvjm.edu.br" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal"/>
+                        <p id="error-email" class="text-danger text-sm mt-1"></p>
+                    </label>
+
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Senha <span class="text-danger">*</span></p>
+                        <input name="password" type="password" placeholder="Sua senha secreta" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal"/>
+                        <p id="error-password" class="text-danger text-sm mt-1"></p>
+                    </label>
+
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Confirme a Senha <span class="text-danger">*</span></p>
+                        <input name="password2" type="password" placeholder="Repita a senha" class="form-input flex w-full min-w-0 flex-1 rounded-lg border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal"/>
+                        <p id="error-password2" class="text-danger text-sm mt-1"></p>
+                    </label>
+                    
+                    <div class="md:col-span-2">
+                        <label class="flex flex-col flex-1 py-3">
+                            <p class="text-base font-medium pb-2">Sobre mim (Biografia)</p>
+                            <textarea name="sobre_mim" placeholder="Fale um pouco sobre seus interesses e o que você busca na plataforma..." class="form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark min-h-32 placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark p-4 text-base font-normal"></textarea>
+                            <p id="error-sobre_mim" class="text-danger text-sm mt-1"></p>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold tracking-tight px-4 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Informações Acadêmicas</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 px-4 py-3 mt-4">
+                    
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Campus <span class="text-danger">*</span></p>
+                        <select name="campus" class="form-select flex w-full min-w-0 flex-1 rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 px-4 text-base font-normal">
+                            <option disabled="" selected="" value="">Selecione seu campus</option>
+                            <option value="DIA">Diamantina</option>
+                            <option value="JAN">Janaúba</option>
+                            <option value="UNA">Unaí</option>
+                            <option value="MUC">Mucuri</option>
+                        </select>
+                        <p id="error-campus" class="text-danger text-sm mt-1"></p>
+                    </label>
+                    
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Curso <span class="text-danger">*</span></p>
+                        <input name="curso" type="text" placeholder="Ex: Sistemas de Informação" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark px-4 text-base font-normal" value=""/>
+                        <p id="error-curso" class="text-danger text-sm mt-1"></p>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold tracking-tight px-4 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Habilidades e Conhecimentos</h2>
+                <div class="px-4 py-3 mt-4">
+                    <label class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Habilidades</p>
+                        <input name="habilidades" type="text" placeholder="Ex: Python, Design Gráfico, Escrita Acadêmica" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark h-12 placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark px-4 text-base font-normal" value=""/>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <div class="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary"><span>JavaScript</span><button class="flex items-center justify-center"><span class="material-symbols-outlined text-sm">close</span></button></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div>
+                <h2 class="text-xl font-bold tracking-tight px-4 pb-3 pt-5 border-b border-border-light dark:border-border-dark">Disponibilidade para Colaboração</h2>
+                <div class="px-4 py-3 mt-4">
+                    <div class="flex flex-col flex-1 py-3">
+                        <p class="text-base font-medium pb-2">Dias da Semana</p>
+                        <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Defina a sua disponibilidade aqui (Ex: Marcar Checkboxes)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-4 p-4 mt-8">
+                <button type="button" onclick="window.history.back()" class="flex min-w-[120px] w-full sm:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-transparent text-text-secondary-light dark:text-text-secondary-dark text-base font-bold border-2 border-transparent hover:bg-gray-500/10 transition-colors">
+                    <span class="truncate">Voltar</span>
+                </button>
+                <button type="submit" class="flex min-w-[120px] w-full sm:w-auto cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold transition-opacity hover:opacity-90">
+                    <span class="truncate">Salvar Perfil</span>
+                    <span class="material-symbols-outlined ml-2">save</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="{% static 'habilidades/js/main.js' %}"></script>
+
+{% endblock %}
