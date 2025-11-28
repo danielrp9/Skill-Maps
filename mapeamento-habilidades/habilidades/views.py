@@ -240,37 +240,36 @@ def editar_perfil_view(request: HttpRequest):
         user_data = user_response.json()
 
         if request.method == 'POST':
-            # Note: O nome é hardcoded no template, use request.POST.get('nome')
+            # 2. Processar POST (PATCH para a API)
             form = UserProfileForm(request.POST) 
             if form.is_valid():
                 
-                # 2. Enviar dados atualizados para a API (PATCH)
-                # Assumimos que o backend ProjectUpdate schema agora aceita todos esses campos
+                # CORREÇÃO CRÍTICA: Usando .get() para evitar KeyError e garantir segurança.
+                # Se o campo não foi preenchido ou não existia no POST, o valor será None/string vazia.
                 payload = {
                     "username": user_data.get('username'), 
-                    "email": form.cleaned_data['email'],
-                    "curso": form.cleaned_data['curso'],
-                    "campus": form.cleaned_data['campus'],
-                    "whatsapp": form.cleaned_data['whatsapp'], 
-                    "discord": form.cleaned_data['discord'],
-                    "telegram": form.cleaned_data['telegram'],
-                    "biografia": form.cleaned_data['biografia'],
-                    "lattes_url": form.cleaned_data['lattes_url'],
-                    "linkedin_url": form.cleaned_data['linkedin_url'],
+                    "email": form.cleaned_data.get('email', user_data.get('email')),
+                    "curso": form.cleaned_data.get('curso'),
+                    "campus": form.cleaned_data.get('campus'),
+                    "whatsapp": form.cleaned_data.get('whatsapp'), 
+                    "discord": form.cleaned_data.get('discord'),
+                    "telegram": form.cleaned_data.get('telegram'),
+                    "biografia": form.cleaned_data.get('biografia'),
+                    "lattes_url": form.cleaned_data.get('lattes_url'),
+                    "linkedin_url": form.cleaned_data.get('linkedin_url'),
                 }
                 
                 patch_response = requests.patch(user_endpoint, json=payload, timeout=10)
                 
                 if patch_response.status_code == 200:
-                    messages.success(request, 'Perfil atualizado com sucesso!')
+                    messages.success(request, 'Perfil atualizado com sucesso! (Verifique a página de perfil para a persistência dos dados).')
                     return redirect('habilidades:perfil_usuario', usuario_id=user_id)
                 else:
                     messages.error(request, f"Falha ao atualizar perfil: Status {patch_response.status_code}. Detalhe: {patch_response.text}")
         
         else:
-            # GET: Preencher o formulário com dados existentes
+            # 3. Processar GET (Pré-preenchimento)
             initial_data = {
-                # Nome é um campo fake no backend, mas preenchemos com username/nome
                 'nome': user_data.get('username'), 
                 'curso': user_data.get('curso'),
                 'campus': user_data.get('campus'),
@@ -281,7 +280,6 @@ def editar_perfil_view(request: HttpRequest):
                 'telegram': user_data.get('telegram', ''),
                 'lattes_url': user_data.get('lattes_url', ''),
                 'linkedin_url': user_data.get('linkedin_url', ''),
-                
             }
             form = UserProfileForm(initial=initial_data)
 
@@ -293,6 +291,118 @@ def editar_perfil_view(request: HttpRequest):
     return render(request, 'habilidades/editar_perfil.html', context)
 
 
+def criar_projeto_view(request: HttpRequest):
+    # ... (Lógica de Criação de Projeto) ...
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        messages.warning(request, 'Você precisa estar logado (via API) para criar um projeto.')
+        return redirect('habilidades:login') # Redireciona para o login
+        
+    if request.method == 'POST':
+        form = ProjectCreationForm(request.POST)
+        if form.is_valid():
+            titulo = form.cleaned_data['titulo']
+            proposito = form.cleaned_data['proposito'] 
+            campus = form.cleaned_data['campus'] # Novo campus
+            habilidades_requeridas = form.cleaned_data['habilidades_requeridas'] # Nova habilidade
+
+            endpoint = f"{API_BASE_URL}/projetos/"
+            payload = {"titulo": titulo, "proposito": proposito, "owner_id": user_id, "campus": campus, "habilidades_requeridas": habilidades_requeridas}
+            
+            try:
+                response = requests.post(endpoint, json=payload, timeout=10)
+
+                if response.status_code == 201 or response.status_code == 200: 
+                    messages.success(request, "Projeto criado com sucesso na API!")
+                    return redirect(reverse('habilidades:lista_projetos'))
+                
+                else:
+                    messages.error(request, f'Falha ao criar projeto na API: Status {response.status_code}. Detalhe: {response.text}')
+
+            except requests.exceptions.RequestException as e:
+                messages.error(request, f'Erro de conexão: {e}')
+            
+    else:
+        form = ProjectCreationForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'habilidades/criar_projeto.html', context)
+
+def editar_projeto_view(request: HttpRequest, projeto_id):
+    # ... (Lógica de Edição de Projeto) ...
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        messages.warning(request, 'Você precisa estar logado para editar projetos.')
+        return redirect('habilidades:login')
+
+    project_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}"
+    
+    try:
+        response = requests.get(project_endpoint, timeout=10)
+        
+        if response.status_code == 200:
+            projeto_data = response.json()
+        elif response.status_code == 404:
+            messages.error(request, 'Projeto não encontrado.')
+            return redirect('habilidades:lista_projetos')
+        else:
+            messages.error(request, f'Erro ao carregar projeto: Status {response.status_code}')
+            return redirect('habilidades:lista_projetos')
+
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f'Erro de conexão ao buscar projeto: {e}')
+        return redirect('habilidades:lista_projetos')
+
+    if projeto_data.get('owner_id') != int(user_id):
+        messages.error(request, 'Você não tem permissão para editar este projeto.')
+        return redirect('habilidades:detalhes_projeto', projeto_id=projeto_id)
+
+    if request.method == 'POST':
+        form = ProjectCreationForm(request.POST)
+        if form.is_valid():
+            endpoint_patch = f"{API_BASE_URL}/projetos/{projeto_id}"
+            
+            payload = {
+                "titulo": form.cleaned_data['titulo'],
+                "proposito": form.cleaned_data['proposito'],
+                "status": form.cleaned_data['status'],
+                "campus": form.cleaned_data['campus'], 
+                "habilidades_requeridas": form.cleaned_data['habilidades_requeridas'],
+            }
+            
+            try:
+                patch_response = requests.patch(endpoint_patch, json=payload, timeout=10)
+                
+                if patch_response.status_code == 200:
+                    messages.success(request, 'Projeto atualizado com sucesso!')
+                    return redirect('habilidades:detalhes_projeto', projeto_id=projeto_id)
+                else:
+                    messages.error(request, f'Falha ao atualizar projeto na API: Status {patch_response.status_code}.')
+
+            except requests.exceptions.RequestException as e:
+                messages.error(request, f'Erro de conexão ao atualizar: {e}')
+    
+    else:
+        initial_data = {
+            'titulo': projeto_data.get('titulo'),
+            'proposito': projeto_data.get('proposito'),
+            'status': projeto_data.get('status'),
+            'campus': projeto_data.get('campus'),
+            'habilidades_requeridas': projeto_data.get('habilidades_requeridas'),
+        }
+        form = ProjectCreationForm(initial=initial_data)
+
+    context = {
+        'form': form,
+        'editing': True,
+        'projeto_id': projeto_id,
+        'projeto_data': projeto_data,
+    }
+    return render(request, 'habilidades/criar_projeto.html', context)
 
 def criar_projeto_view(request: HttpRequest):
     """
@@ -426,47 +536,56 @@ def perfil_usuario_view(request: HttpRequest, usuario_id):
     """
     Busca os detalhes do usuário na API e lista seus projetos criados.
     """
+    user_id_logado = request.session.get('user_id')
+    is_current_user = False
+    
+    if user_id_logado is not None:
+        try:
+            is_current_user = int(user_id_logado) == usuario_id
+        except ValueError:
+            pass
+            
     usuario = None
     projetos_criados = []
 
-    # 1. Buscar Detalhes do Usuário (GET /usuarios/{user_id})
     user_endpoint = f"{API_BASE_URL}/usuarios/{usuario_id}"
-    
-    # 2. Buscar Projetos Criados pelo Usuário (GET /projetos/usuario/{user_id})
     projects_endpoint = f"{API_BASE_URL}/projetos/usuario/{usuario_id}"
 
     try:
-        # Requisita os dados do Usuário
         user_response = requests.get(user_endpoint, timeout=10)
+        
         if user_response.status_code == 200:
             usuario = user_response.json()
         
-        # Requisita os projetos criados
-        projects_response = requests.get(projects_endpoint, timeout=10)
-        if projects_response.status_code == 200:
-            projetos_criados = projects_response.json()
+            projects_response = requests.get(projects_endpoint, timeout=10)
+            if projects_response.status_code == 200:
+                projetos_criados = projects_response.json()
 
         elif user_response.status_code == 404:
             messages.error(request, f"Usuário ID {usuario_id} não encontrado na API.")
             
-    except requests.exceptions.ConnectionError:
-        messages.error(request, 'Não foi possível conectar ao Backend (Docker).')
-    except Exception as e:
-        messages.error(request, f'Ocorreu um erro: {e}')
+        else:
+            messages.error(request, f"Erro ao carregar dados do usuário (Status {user_response.status_code}).")
+
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f'Erro de conexão: {e}')
         
     
-    # Se o usuário não foi encontrado, evite erros de template
+    # CORREÇÃO: Não passamos 'messages' se o usuário for None. O Django fará isso automaticamente.
     if not usuario:
-        return render(request, 'habilidades/perfil_usuario.html', {'messages': messages})
+        return render(request, 'habilidades/perfil_usuario.html', {})
 
 
     context = {
         'usuario': usuario,
         'projetos_criados': projetos_criados,
-        # Você pode adicionar aqui uma flag 'is_current_user' se desejar
+        'is_current_user': is_current_user,
     }
+    # O Django injeta a lista de mensagens correta no contexto aqui
     return render(request, 'habilidades/perfil_usuario.html', context)
-    
+
+
+
 def lista_projetos_view(request: HttpRequest):
     """
     Lista todos os projetos disponíveis na API. 
@@ -505,11 +624,11 @@ def lista_projetos_view(request: HttpRequest):
 
 def detalhes_projeto_view(request: HttpRequest, projeto_id):
     """
-    Busca os detalhes de um projeto, seu owner e seus colaboradores na API (com GET /colaboradores).
-    Inclui checagem robusta de tipo para participação.
+    Busca os detalhes de um projeto, seu owner, colaboradores E as estatísticas de avaliação.
     """
     user_id = request.session.get('user_id')
-    # GARANTINDO QUE user_id É UM INTEIRO (se existir) para comparação com o JSON
+    
+    # Tentativa de converter o user_id da sessão para int
     if user_id is not None:
         try:
             user_id = int(user_id)
@@ -519,72 +638,75 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
     projeto = None
     owner = None
     colaboradores = []
+    avaliacoes_stats = None # Inicializa o novo campo para estatísticas
     usuario_e_colaborador = False
+    is_owner = False
     
     try:
-        # 1. Busca detalhes do Projeto (usando a listagem como workaround)
-        listagem_endpoint = f"{API_BASE_URL}/projetos/"
-        listagem_response = requests.get(listagem_endpoint, timeout=10)
-        
-        if listagem_response.status_code == 200:
-            projetos_lista = listagem_response.json()
-            for p in projetos_lista:
-                if p.get('id') == projeto_id:
-                    projeto = p
-                    break
-            
-            if projeto:
-                # 2. Busca detalhes do Owner
-                owner_id = projeto.get('owner_id')
-                if owner_id:
-                    owner_endpoint = f"{API_BASE_URL}/usuarios/{owner_id}"
-                    owner_response = requests.get(owner_endpoint, timeout=10)
-                    if owner_response.status_code == 200:
-                        owner = owner_response.json()
-                
-                # 3. BUSCA DE COLABORADORES (ENDPOINT CORRETO)
-                colaboradores_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/colaboradores"
-                colaboradores_response = requests.get(colaboradores_endpoint, timeout=10)
-                
-                if colaboradores_response.status_code == 200:
-                    colaboradores = colaboradores_response.json()
-                    
-                    # CHECAGEM ROBUSTA DE PARTICIPAÇÃO
-                    if user_id is not None:
-                        for colaborador in colaboradores:
-                            colaborador_id = colaborador.get('id')
-                            
-                            if colaborador_id == user_id: 
-                                usuario_e_colaborador = True
-                                break
-                
-                # 4. VERIFICAÇÃO SE O OWNER É O USUÁRIO LOGADO
-                is_owner = owner_id == user_id if user_id is not None and owner_id is not None else False
-                
-            else:
-                messages.error(request, f"Projeto ID {projeto_id} não encontrado na lista retornada pela API.")
+        # ENDPOINTS
+        project_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}"
+        colaboradores_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/colaboradores"
+        avaliacoes_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/avaliacoes" # NOVO ENDPOINT
 
+        # 1. Busca detalhes do Projeto (GET /projetos/{id})
+        projeto_response = requests.get(project_endpoint, timeout=10)
+        if projeto_response.status_code == 200:
+            projeto = projeto_response.json()
+        elif projeto_response.status_code == 404:
+            messages.error(request, f"Projeto ID {projeto_id} não encontrado na API.")
+            return redirect('habilidades:lista_projetos')
         else:
-            messages.error(request, f"Erro ao carregar lista de projetos (Status {listagem_response.status_code}).")
+            messages.error(request, f"Erro ao carregar projeto: Status {projeto_response.status_code}.")
+            return redirect('habilidades:lista_projetos')
+
+
+        # 2. Busca detalhes do Owner
+        owner_id = projeto.get('owner_id')
+        if owner_id:
+            owner_endpoint = f"{API_BASE_URL}/usuarios/{owner_id}"
+            owner_response = requests.get(owner_endpoint, timeout=10)
+            if owner_response.status_code == 200:
+                owner = owner_response.json()
+        
+        # 3. Busca de Colaboradores
+        colaboradores_response = requests.get(colaboradores_endpoint, timeout=10)
+        if colaboradores_response.status_code == 200:
+            colaboradores = colaboradores_response.json()
+            
+            if user_id is not None:
+                # Checagem de Participação (Se o usuário logado está na lista de colaboradores)
+                for colaborador in colaboradores:
+                    if colaborador.get('id') == user_id: 
+                        usuario_e_colaborador = True
+                        break
+        
+        # 4. Busca de Estatísticas de Avaliação (NOVO)
+        avaliacoes_response = requests.get(avaliacoes_endpoint, timeout=10)
+        if avaliacoes_response.status_code == 200:
+            avaliacoes_stats = avaliacoes_response.json()
+        
+        # 5. Verificação de Permissão
+        is_owner = owner_id == user_id if user_id is not None and owner_id is not None else False
+        participa_do_projeto = usuario_e_colaborador or is_owner
 
     except requests.exceptions.ConnectionError:
         messages.error(request, 'Não foi possível conectar ao Backend (Docker) para buscar o projeto.')
+        return redirect('habilidades:lista_projetos')
     except Exception as e:
         messages.error(request, f'Ocorreu um erro inesperado: {e}')
-        
-   
-    # Define o estado final para o template
-    participa_do_projeto = usuario_e_colaborador or is_owner
+        return redirect('habilidades:lista_projetos') 
         
     context = {
         'projeto': projeto,
         'owner': owner,
         'colaboradores': colaboradores,
+        'avaliacoes_stats': avaliacoes_stats, # Passa as estatísticas para o template
         'usuario_e_colaborador': usuario_e_colaborador, 
         'is_owner': is_owner,
         'projeto_id': projeto_id,
         'participa_do_projeto': participa_do_projeto,
-        'feedbacks': [{'autor': 'Ricardo', 'texto': 'Iniciativa fantástica!'}],
+        # Define o link para o botão "Avaliar Projeto"
+        'link_avaliar': reverse('habilidades:avaliar_projeto', kwargs={'project_id': projeto_id}) if participa_do_projeto else None,
     }
     
     return render(request, 'habilidades/detalhes_projeto.html', context)
@@ -810,3 +932,203 @@ def perfil_usuario_view(request: HttpRequest, usuario_id):
         'is_current_user': is_current_user, # NOVO: Flag para o botão de edição
     }
     return render(request, 'habilidades/perfil_usuario.html', context)
+
+# Definição das opções de resposta (Escala de 0 a 5)
+RESPOSTA_CHOICES = [
+    (5, 'Completamente (5 Estrelas)'),
+    (3, 'Parcialmente (3 Estrelas)'),
+    (0, 'Não Atendeu (0 Estrelas)'),
+]
+
+# Definição dos Widgets (Adaptando os que você já usa)
+TEXTAREA_WIDGET_AVALIACAO = forms.Textarea(attrs={'class': 'form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary p-[15px] text-base font-normal leading-normal min-h-[100px]', 'rows': 4})
+RADIO_WIDGET = forms.RadioSelect(attrs={'class': 'form-radio text-primary focus:ring-primary/50'})
+
+class FeedbackForm(forms.Form):
+    """Formulário padrão de avaliação para o serviço colaborativo."""
+    
+    # 1. Avaliação Geral (Relevância)
+    nota_geral = forms.ChoiceField(
+        choices=RESPOSTA_CHOICES,
+        widget=RADIO_WIDGET,
+        label="Avaliação Geral da Relevância"
+    )
+    # 2. Atendimento às Necessidades
+    atendeu_necessidades = forms.ChoiceField(
+        choices=RESPOSTA_CHOICES,
+        widget=RADIO_WIDGET,
+        label="O projeto atendeu às suas necessidades?"
+    )
+    # 3. Atendimento à Proposta
+    atendeu_proposta = forms.ChoiceField(
+        choices=RESPOSTA_CHOICES,
+        widget=RADIO_WIDGET,
+        label="O projeto cumpriu o que foi proposto?"
+    )
+    
+    comentario = forms.CharField(
+        widget=TEXTAREA_WIDGET_AVALIACAO,
+        required=False,
+        label="Comentários Adicionais"
+    )
+
+def submit_feedback_view(request: HttpRequest, projeto_id):
+    """
+    Processa o formulário de avaliação do projeto e envia o POST para a API.
+    """
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, 'Você deve estar logado para enviar feedback.')
+        return redirect('habilidades:detalhes_projeto', projeto_id=projeto_id)
+        
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/feedback"
+            
+            # Constrói o payload com as notas como INTEIROS (necessário para o Pydantic)
+            payload = {
+                "user_id": int(user_id),
+                "projeto_id": projeto_id,
+                "nota_geral": int(form.cleaned_data['nota_geral']),
+                "atendeu_necessidades": int(form.cleaned_data['atendeu_necessidades']),
+                "atendeu_proposta": int(form.cleaned_data['atendeu_proposta']),
+                "comentario": form.cleaned_data['comentario'],
+            }
+
+            try:
+                response = requests.post(endpoint, json=payload, timeout=10)
+                
+                if response.status_code == 200 or response.status_code == 201:
+                    messages.success(request, 'Sua avaliação foi registrada com sucesso! Obrigado pela sua contribuição democrática.')
+                else:
+                    messages.error(request, f'Falha ao enviar feedback: Status {response.status_code}. Detalhe: {response.text}')
+            
+            except requests.exceptions.RequestException as e:
+                messages.error(request, f'Erro de conexão ao enviar feedback: {e}')
+                
+    return redirect('habilidades:detalhes_projeto', projeto_id=projeto_id)
+
+# Definição das opções de Métrica Textual
+METRICA_TEXTUAL_CHOICES = [
+    ('excelente', 'Excelente (5)'),
+    ('razoavel', 'Razoável (3)'),
+    ('nao cumpre', 'Não cumpre com o que foi proposto (0)'),
+]
+
+# Definição dos Widgets (Mantendo o estilo que você já usa)
+TEXTAREA_WIDGET_AVALIACAO = forms.Textarea(attrs={'class': 'form-input flex w-full min-w-0 flex-1 resize-y overflow-hidden rounded-lg focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark focus:border-primary p-[15px] text-base font-normal leading-normal min-h-[100px]', 'rows': 4})
+RADIO_WIDGET = forms.RadioSelect(attrs={'class': 'form-radio text-primary focus:ring-primary/50'})
+
+class AvaliacaoProjetoForm(forms.Form):
+    """Formulário padrão de avaliação alinhado com o endpoint RESTful."""
+    
+    # 1. Nota Geral (0 a 5)
+    nota_geral = forms.ChoiceField(
+        choices=[(i, str(i)) for i in range(6)], # Gera as opções 0, 1, 2, 3, 4, 5
+        widget=RADIO_WIDGET,
+        label="Sua nota geral para o projeto (0 a 5)"
+    )
+    
+    # 2. Métrica Textual (Excelente, Razoável, Não Cumpre)
+    metrica_textual = forms.ChoiceField(
+        choices=METRICA_TEXTUAL_CHOICES,
+        widget=RADIO_WIDGET,
+        label="Métrica de Cumprimento da Proposta"
+    )
+    
+    # 3. Comentário/Feedback
+    comentario = forms.CharField(
+        widget=TEXTAREA_WIDGET_AVALIACAO,
+        required=False,
+        label="Comentários Adicionais (Feedback opcional)"
+    )
+
+# --- ADICIONE ESTA FUNÇÃO EM habilidades/views.py ---
+
+def get_user_id_and_token(request):
+    """
+    Função auxiliar para obter o ID e (opcionalmente) o token do usuário logado na API.
+    ATENÇÃO: Este sistema usa apenas o user_id na sessão. O backend deve usar o token JWT real para segurança.
+    Aqui, usaremos o user_id da sessão como identificador primário.
+    """
+    user_id = request.session.get('user_id')
+    user_token = request.session.get('api_token', None) # Se você usar um token em alguma outra view, ele estaria aqui.
+    return user_id, user_token
+
+
+def avaliar_projeto_view(request: HttpRequest, project_id):
+    """
+    Carrega o formulário de avaliação, verifica a permissão e envia a avaliação para o endpoint RESTful.
+    """
+    user_id, user_token = get_user_id_and_token(request)
+    
+    if not user_id:
+        messages.error(request, 'Você precisa estar logado para avaliar projetos.')
+        return redirect('habilidades:login')
+
+    # A API deve receber o Authorization Bearer Token, mas como não temos o token JWT aqui,
+    # assumimos que o backend valida o ID e afiliação de outras formas (ou vamos improvisar o header).
+    headers = {'Content-Type': 'application/json'}
+    # Se você estivesse usando um token JWT para o frontend:
+    # headers['Authorization'] = f'Bearer {user_token}' 
+
+    # 1. Tentar obter detalhes do projeto (Para renderizar o título)
+    project_endpoint = f"{API_BASE_URL}/projetos/{project_id}"
+    try:
+        project_response = requests.get(project_endpoint, timeout=10)
+        project_response.raise_for_status()
+        project_data = project_response.json()
+    except requests.exceptions.RequestException as e:
+        messages.error(request, f"Erro ao carregar projeto ou conectar à API: {e}")
+        return redirect('habilidades:lista_projetos') 
+
+    # Variáveis de controle para o template (assumimos que pode avaliar até provar o contrário)
+    context = {
+        'project_id': project_id,
+        'project_title': project_data.get('titulo', 'Projeto Desconhecido'),
+        'form': AvaliacaoProjetoForm(),
+        'already_evaluated': False,
+        'can_evaluate': True, 
+    }
+
+    if request.method == 'POST':
+        form = AvaliacaoProjetoForm(request.POST)
+        if form.is_valid():
+            # 2. Montar o payload (Nota, Métrica Textual e Comentário)
+            # O ID do avaliador e do projeto são implícitos na URL e no contexto de autenticação.
+            payload = {
+                "nota_geral": int(form.cleaned_data['nota_geral']),
+                "metrica_textual": form.cleaned_data['metrica_textual'].lower(),
+                "comentario": form.cleaned_data.get('comentario')
+            }
+
+            # 3. Enviar a avaliação para o novo endpoint RESTful
+            try:
+                url_endpoint = f"{API_BASE_URL}/projetos/{project_id}/avaliar"
+                response = requests.post(url_endpoint, headers=headers, json=payload, timeout=10)
+                
+                # Tratar resposta (sucesso ou erro)
+                if response.status_code == 201:
+                    messages.success(request, "Sua avaliação foi enviada com sucesso!")
+                    return redirect('habilidades:detalhes_projeto', projeto_id=project_id)
+
+                # Tratar erros específicos da API
+                error_detail = response.json().get('detail', response.text)
+                
+                if response.status_code == 403: # Proibido (Não é membro)
+                    messages.error(request, f"Acesso negado. Apenas membros e o proprietário podem avaliar. Detalhe: {error_detail}")
+                    context['can_evaluate'] = False
+                elif response.status_code == 409: # Conflito (Já avaliou)
+                    messages.warning(request, f"Você já avaliou este projeto. {error_detail}")
+                    context['already_evaluated'] = True
+                else:
+                    messages.error(request, f"Erro ao enviar avaliação: Status {response.status_code}. Detalhe: {error_detail}")
+
+            except requests.exceptions.RequestException as e:
+                messages.error(request, f"Erro de conexão com a API ao tentar enviar a avaliação: {e}")
+        
+        context['form'] = form # Re-renderiza o formulário com erros, se houver.
+        
+    # Lógica de GET (Renderizar o Formulário) ou se o POST falhou
+    return render(request, 'habilidades/avaliar_projeto.html', context)
