@@ -2,9 +2,8 @@
 Django settings for config project.
 """
 import os
-from pathlib import Path # Mantendo a importação de Path
+from pathlib import Path
 
-# CORREÇÃO 1: Definir BASE_DIR de forma limpa. 
 # BASE_DIR aponta para a pasta *externa* (a que contém manage.py, config/, e habilidades/)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -99,11 +98,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 
-# CORREÇÃO 2: Ajuste para STATICFILES_DIRS usando o objeto Path, que é mais idiomático e seguro.
-# O caminho correto para o Django procurar seus arquivos estáticos:
-# BASE_DIR / 'habilidades/static' aponta para /home/.../mapeamento-habilidades/habilidades/static
+# CORREÇÃO DEFINITIVA: O Django procurará na pasta /habilidades/static/
 STATICFILES_DIRS = [
-    BASE_DIR / 'habilidades/static',
+    BASE_DIR / 'habilidades' / 'static',
 ]
 
 

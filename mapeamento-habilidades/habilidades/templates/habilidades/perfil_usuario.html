@@ -1,77 +1,72 @@
 {% extends "habilidades/base.html" %}
 {% load static %}
 
-{% block title %}Perfil de Usuário - UFVJM SkillMap{% endblock %}
+{% block title %}Perfil de {{ usuario.username|default:"Usuário" }}{% endblock %}
 
 {% block content %}
-<main class="layout-container flex h-full grow flex-col items-center py-5 sm:py-8 lg:py-12">
-<div class="layout-content-container flex flex-col w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8" data-user-id="{{ usuario_id }}">
+<main class="container mx-auto flex-1 p-4 lg:p-8 max-w-4xl">
     
-    <div id="profile-data-container">
-        <div class="flex w-full flex-col gap-4 items-start border-b border-border-light dark:border-border-dark pb-8">
-            <div class="flex flex-col sm:flex-row w-full gap-6 items-start">
-                <div id="user-avatar" class="bg-center bg-no-repeat aspect-square bg-cover rounded-full shrink-0 size-32" style='background-image: url("{% static "habilidades/img/default-avatar.png" %}");'></div>
-                
-                <div class="flex flex-col justify-center flex-1 gap-2">
-                    <p id="user-name" class="text-3xl font-bold leading-tight tracking-[-0.015em]">Carregando Nome...</p>
-                    <p id="user-info" class="text-lg font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Carregando Curso - Campus...</p>
-                    <p id="user-location" class="text-base font-normal leading-normal text-text-light/70 dark:text-text-dark/70">Carregando Cidade, MG</p>
+    {% if messages %}
+        <div class="w-full mb-4">
+            {% for message in messages %}
+                <div class="p-3 {% if message.tags == 'error' %}bg-red-200 text-red-800 border border-red-300{% elif message.tags == 'success' %}bg-green-200 text-green-800 border border-green-300{% endif %} rounded-lg text-sm font-medium">
+                    {{ message }}
                 </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-                <div class="flex w-full sm:w-auto gap-3">
-                    <button id="send-message-btn" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold flex-1 sm:flex-auto">
-                        <span class="truncate">Enviar Mensagem</span>
-                    </button>
-                    <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark text-sm font-bold flex-1 sm:flex-auto hover:bg-background-light dark:hover:bg-background-dark transition-colors">
-                        <span class="truncate">Seguir</span>
-                    </button>
-                </div>
+    {% if usuario %}
+    <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-border-light dark:border-border-dark">
+        <div class="flex justify-between items-start mb-4">
+            
+            <div class="flex flex-col">
+                <h1 class="text-3xl font-bold">Perfil de {{ usuario.username }}</h1>
+                <p class="text-text-light/70 dark:text-text-dark/70 text-sm">Visualizando perfil. ID: {{ usuario.id }}</p>
             </div>
+            
+            {% if is_current_user %}
+                <a href="{% url 'habilidades:editar_perfil' %}" class="flex items-center justify-center gap-1 overflow-hidden rounded-lg h-10 px-4 bg-secondary text-white text-sm font-bold tracking-wide transition-colors hover:bg-secondary/80">
+                    <span class="material-symbols-outlined text-xl">edit</span>
+                    Editar Perfil
+                </a>
+            {% endif %}
+            
         </div>
         
-        <div class="flex flex-col lg:flex-row gap-8 xl:gap-12 py-8">
-            <aside class="w-full lg:w-1/3 xl:w-1/4 flex flex-col gap-6">
-                <div id="skill-list-container" class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
-                    <h3 class="text-lg font-bold mb-4">Habilidades Principais</h3>
-                    <div id="skills-tags" class="flex flex-wrap gap-2">
-                        <span class="bg-primary/20 text-primary text-xs font-bold px-3 py-1 rounded-full">Python</span>
-                    </div>
-                </div>
-                <div class="bg-card-light dark:bg-card-dark p-6 rounded-xl border border-border-light dark:border-border-dark">
-                    <h3 class="text-lg font-bold mb-4">Contato</h3>
-                    <div class="flex flex-col gap-3">
-                        <a id="contact-email" class="flex items-center gap-3 text-text-light/70 dark:text-text-dark/70 hover:text-primary transition-colors" href="#">
-                            <span class="material-symbols-outlined">mail</span>
-                            <span class="text-sm font-medium">joao.silva@ufvjm.edu.br</span>
-                        </a>
-                        </div>
-                </div>
-            </aside>
-
-            <div class="w-full lg:w-2/3 xl:w-3/4 flex flex-col">
-                <div class="pb-3">
-                    <div class="flex border-b border-border-light dark:border-border-dark gap-8">
-                        <a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary text-text-light dark:text-text-dark pb-3 pt-1" href="#">
-                            <p class="text-sm font-bold">Sobre</p>
-                        </a>
-                        </div>
-                </div>
-                
-                <div class="flex flex-col gap-8 pt-6">
-                    <section>
-                        <h3 class="text-lg font-bold pb-2">Sobre Mim</h3>
-                        <p id="user-bio" class="text-base font-normal leading-relaxed text-text-light/80 dark:text-text-dark/80">
-                            Estudante de Sistemas de Informação apaixonado por resolver problemas complexos com tecnologia. Busco oportunidades de colaboração...
-                        </p>
-                    </section>
-                    <section id="recent-projects">
-                        <h3 class="text-lg font-bold pb-3">Projetos Recentes</h3>
-                        <p class="text-text-light/70 dark:text-text-dark/70">Projetos serão carregados aqui via JS...</p>
-                    </section>
-                </div>
+        <div class="flex items-center gap-4 mb-6">
+            <div class="size-24 bg-gray-300 rounded-full flex items-center justify-center text-xl font-bold">
+                {{ usuario.username|slice:":1"|upper }}
+            </div>
+            
+            <div class="flex flex-col">
+                <p class="text-lg font-semibold">{{ usuario.username }}</p>
+                <p class="text-text-light/70 dark:text-text-dark/70">{{ usuario.email }}</p>
+                <p class="text-sm mt-1">Campus: {{ usuario.campus }} / Curso: {{ usuario.curso }}</p>
             </div>
         </div>
+
+        <h2 class="text-2xl font-bold mt-8 mb-3">Projetos Criados ({{ projetos_criados|length }})</h2>
+        
+        {% if projetos_criados %}
+            <ul class="list-disc ml-6 space-y-2">
+                {% for projeto in projetos_criados %}
+                    <li>
+                        <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto.id %}" class="text-primary hover:underline">
+                            {{ projeto.titulo }}
+                        </a>
+                        <span class="text-sm text-text-light/70 dark:text-text-dark/70"> (Status: {{ projeto.status }})</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-text-light/70 dark:text-text-dark/70">Nenhum projeto criado ainda.</p>
+        {% endif %}
+        
     </div>
-</div>
+    {% else %}
+        <h1 class="text-3xl font-bold text-danger">Falha ao carregar perfil.</h1>
+    {% endif %}
+
 </main>
 {% endblock %}

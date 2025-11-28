@@ -1,0 +1,126 @@
+{% extends "habilidades/base.html" %}
+{% load static %}
+
+{% block title %}{% if editing %}Editar Projeto{% else %}Criar Novo Projeto{% endif %} - SkillMap{% endblock %}
+
+{% block content %}
+<main class="container mx-auto flex-1 p-4 lg:p-8 max-w-4xl">
+    <div class="flex w-full flex-col gap-4 items-start border-b border-[#e7f3eb] dark:border-gray-800 pb-8">
+        <h1 class="text-4xl font-black leading-tight tracking-[-0.033em]">
+            {% if editing %}Editar Projeto: {{ projeto_data.titulo|default:projeto_id }}{% else %}Criar Novo Projeto{% endif %}
+        </h1>
+        <p class="text-text-light/70 dark:text-text-dark/70 text-base font-normal leading-normal">
+            Preencha os detalhes do projeto que você gostaria de iniciar e as habilidades necessárias para colaborar.
+        </p>
+    </div>
+
+    <form method="post" action="{% if editing %}{% url 'habilidades:editar_projeto' projeto_id=projeto_id %}{% else %}{% url 'habilidades:criar_projeto' %}{% endif %}" class="mt-8 bg-card-light dark:bg-card-dark p-6 rounded-xl shadow-lg border border-border-light dark:border-border-dark">
+        {% csrf_token %}
+        
+        {% if messages %}
+            <div class="w-full mb-4">
+            {% for message in messages %}
+                <div class="p-3 {% if message.tags == 'error' %}bg-danger/10 text-danger border border-danger/20{% elif message.tags == 'success' %}bg-primary/10 text-primary border border-primary/20{% endif %} rounded-lg text-sm font-medium">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="space-y-6">
+            <div>
+                <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    {{ form.titulo.label }}
+                </label>
+                {{ form.titulo }}
+                {% if form.titulo.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.titulo.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.proposito.id_for_label }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    Descrição Completa
+                </label>
+                {{ form.proposito }}
+                {% if form.proposito.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.proposito.errors }}</p>
+                {% endif %}
+                <p class="text-xs text-text-light/50 dark:text-text-dark/50 mt-1">Descreva o objetivo, escopo e resultados esperados.</p>
+            </div>
+            
+            <div>
+                <label for="{{ form.campus.id_for_label }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    {{ form.campus.label }}
+                </label>
+                {{ form.campus }}
+                {% if form.campus.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.campus.errors }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.habilidades_requeridas.id_for_label }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    {{ form.habilidades_requeridas.label }}
+                </label>
+                {{ form.habilidades_requeridas }}
+                {% if form.habilidades_requeridas.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.habilidades_requeridas.errors }}</p>
+                {% endif %}
+                <p class="text-xs text-text-light/50 dark:text-text-dark/50 mt-1">Ex: Python, Figma, Redação Científica.</p>
+            </div>
+
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-text-light dark:text-text-dark mb-1">
+                    {{ form.status.label }}
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.status.errors }}</p>
+                {% endif %}
+            </div>
+
+            <style>
+                /* Estilos mantidos para consistência */
+                .form-control, textarea, select {
+                    display: block;
+                    width: 100%;
+                    padding: 0.75rem 1rem;
+                    background-color: transparent;
+                    border: 1px solid #e7f3eb; /* border-border-light */
+                    border-radius: 0.5rem; /* rounded-lg */
+                    color: #0d1b12; /* text-text-light */
+                    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                    .form-control, textarea, select {
+                        background-color: #102216; /* bg-background-dark */
+                        border-color: #3b3b3b; /* dark:border-border-dark */
+                        color: #ccc; /* dark:text-text-dark */
+                    }
+                }
+                
+                .form-control:focus, textarea:focus, select:focus {
+                    border-color: #13ec5b; /* primary color */
+                    box-shadow: 0 0 0 1px #13ec5b;
+                    outline: 0;
+                }
+
+                textarea {
+                    min-height: 100px;
+                }
+            </style>
+        </div>
+
+        <div class="flex justify-end gap-3 mt-8">
+            <a href="{% url 'habilidades:lista_projetos' %}" class="flex items-center justify-center rounded-lg h-10 px-4 text-sm font-bold text-text-light dark:text-text-dark border border-border-light dark:border-border-dark hover:bg-input-light dark:hover:bg-input-dark transition-colors">
+                <span class="truncate">Cancelar</span>
+            </a>
+            <button type="submit" class="flex items-center justify-center rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold transition-opacity hover:opacity-90">
+                <span class="truncate">{% if editing %}Salvar Alterações{% else %}Publicar Projeto{% endif %}</span>
+            </button>
+        </div>
+    </form>
+</main>
+{% endblock %}
