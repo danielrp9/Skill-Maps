@@ -1,12 +1,18 @@
 from django import template
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
 @register.filter
-def split_comma(value):
+@stringfilter
+def split_string(value, separator=','):
     """
-    Divide uma string por vírgulas e retorna uma lista de itens limpos.
+    Divide uma string em uma lista usando um separador (padrão é vírgula).
+    Também limpa espaços em branco em cada item.
+    Uso: {{ string_de_habilidades|split_string:", " }}
     """
-    if isinstance(value, str):
-        return [item.strip() for item in value.split(',') if item.strip()]
-    return []
+    if not value:
+        return []
+    
+    # Divide a string e remove espaços em branco antes/depois de cada item
+    return [item.strip() for item in value.split(separator)]

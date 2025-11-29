@@ -786,3 +786,4 @@ def avaliar_projeto_view(request: HttpRequest, projeto_id):
         context['form'] = form 
         
     return render(request, 'habilidades/avaliar_projeto.html', context)
+

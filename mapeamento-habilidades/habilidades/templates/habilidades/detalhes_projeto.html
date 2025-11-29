@@ -1,5 +1,6 @@
 {% extends "habilidades/base.html" %}
 {% load static %}
+{% load project_tags %} <!-- Necessário para o filtro split_string -->
 
 {% block title %}Detalhes do Projeto: {{ projeto.titulo|default:"Carregando..." }}{% endblock %}
 
@@ -58,8 +59,8 @@
 <h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">Habilidades Necessárias</h2>
 <div class="flex flex-wrap gap-3">
     {% if projeto.habilidades_requeridas %}
-        <!-- ATENÇÃO: Se habilidade for string CSV, o filtro personalizado precisa ser carregado -->
-        {% for habilidade in projeto.habilidades_requeridas %}
+        <!-- CORREÇÃO DA VISUALIZAÇÃO: Usa o filtro split_string -->
+        {% for habilidade in projeto.habilidades_requeridas|split_string:", " %}
             <span class="flex items-center justify-center rounded-lg px-3 py-1.5 bg-primary/20 text-gray-900 dark:text-white text-sm font-medium border border-primary/50">{{ habilidade }}</span>
         {% endfor %}
     {% else %}
@@ -103,7 +104,6 @@
         <div>
             <p class="font-semibold text-gray-900 dark:text-white">Campus (Geolocalização)</p>
             <p class="text-gray-700 dark:text-gray-300">
-                <!-- CORREÇÃO DE GEOLOCALIZAÇÃO APLICADA -->
                 {{ projeto.campus|default:owner.campus|default:"Não informado" }}
             </p>
         </div>
@@ -113,7 +113,8 @@
         <div>
             <p class="font-semibold text-gray-900 dark:text-white">Criado em</p>
             <p class="text-gray-700 dark:text-gray-300">
-                {{ projeto.created_at|default:"N/A" }}
+                <!-- CORREÇÃO DA DATA: Aplica o filtro |date para formatar -->
+                {{ projeto.created_at|default:"N/A"|date:"d/m/Y H:i" }}
             </p>
         </div>
     </div>
