@@ -1,5 +1,6 @@
 {% extends "habilidades/base.html" %}
 {% load static %}
+{% load project_tags %} <!-- Assumindo que split_string está aqui -->
 
 {% block title %}Explore Projetos e Demandas - SkillMap{% endblock %}
 
@@ -16,7 +17,7 @@
                 </p>
             </div>
             
-            <a href="{% url 'habilidades:criar_projeto' %}" id="create-project-btn" class="flex items-center justify-center gap-2 rounded-lg bg-primary text-white px-6 py-3 text-sm font-bold shadow-sm hover:bg-opacity-90 transition-all duration-200">
+            <a href="{% url 'habilidades:criar_projeto' %}" id="create-project-btn" class="flex items-center justify-center gap-2 rounded-lg bg-primary text-gray-900 px-6 py-3 text-sm font-bold shadow-sm hover:opacity-90 transition-all duration-200">
                 <span class="material-symbols-outlined">add_circle</span>
                 <span>Criar Novo Projeto</span>
             </a>
@@ -75,18 +76,28 @@
                         {{ projeto.proposito }}
                     </p>
                     
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        <span class="text-xs font-semibold text-primary bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded-full">Python</span>
+                    <!-- EXIBIÇÃO DE HABILIDADES -->
+                    <div class="flex flex-wrap gap-2 mt-2 h-8 overflow-hidden">
+                        {% if projeto.habilidades_requeridas %}
+                            {% for habilidade in projeto.habilidades_requeridas|split_string:", " %}
+                                <span class="text-xs font-semibold text-primary bg-primary/10 dark:bg-primary/20 px-2 py-1 rounded-full">{{ habilidade }}</span>
+                            {% endfor %}
+                        {% else %}
+                             <span class="text-xs font-medium text-text-light/70 dark:text-text-dark/70">Sem habilidades listadas</span>
+                        {% endif %}
                     </div>
                 </div>
                 
                 <div class="flex justify-between items-center mt-auto pt-4 border-t border-border-light dark:border-border-dark">
-                    <div class="flex items-center -space-x-2">
-                        <span class="material-symbols-outlined text-text-light/70 dark:text-text-dark/70">groups</span>
-                        <p class="text-text-light/70 dark:text-text-dark/70 text-sm font-medium ml-2">ID: {{ projeto.id }}</p>
+                    <!-- CORRIGIDO: Mostra Contagem de Colaboradores em vez de Criador -->
+                    <div class="flex items-center">
+                        <span class="material-symbols-outlined text-text-light/70 dark:text-text-dark/70 !text-xl mr-1">groups</span>
+                        <p class="text-text-light/70 dark:text-text-dark/70 text-sm font-medium">
+                            <span class="font-bold">{{ projeto.colaboradores|length|default:0 }}</span> Colaborador{% if projeto.colaboradores|length != 1 %}es{% endif %}
+                        </p>
                     </div>
                     
-                    <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto.id %}" class="bg-primary text-white font-bold text-sm px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors duration-200">Ver Detalhes</a>
+                    <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto.id %}" class="bg-primary text-gray-900 font-bold text-sm px-4 py-2 rounded-lg hover:opacity-90 transition-colors duration-200">Ver Detalhes</a>
                 </div>
             </div>
             {% endfor %}
