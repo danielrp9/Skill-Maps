@@ -3,19 +3,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import logout as auth_logout
 from django import forms
-from django.urls import reverse # Import necessário para redirecionamento correto
+from django.urls import reverse
 from django.contrib import messages
 from django.http import HttpRequest
 import requests
-import json # Adicionado para melhor manipulação de JSON
+import json 
 
 # Variável de configuração da API (URL Base)
 API_BASE_URL = "http://localhost:8001/api/v1"
 
-# from .models import UserProfile # Descomente e ajuste quando tiver seu modelo
-
-# --- Placeholder de Modelo e Formulário para Edição ---
-# **AVISO:** Substitua isso pelos seus modelos e formulários reais.
 class FakeUserProfile:
     """Modelo fake para simular o UserProfile (A SER REMOVIDO)"""
     def __init__(self, user):
@@ -36,8 +32,6 @@ class UserProfileForm(forms.Form):
     lattes_url = forms.URLField(required=False)
     linkedin_url = forms.URLField(required=False)
 
-# Novo formulário placeholder para Criação de Projeto
-# AJUSTADO para mapear Descrição Completa (do template) para Propósito (da API)
 class ProjectCreationForm(forms.Form):
     titulo = forms.CharField(max_length=100, label="Título do Projeto")
     # O campo 'proposito' é usado para coletar a Descrição Completa do template
@@ -47,10 +41,7 @@ class ProjectCreationForm(forms.Form):
     status = forms.ChoiceField(choices=[('AB', 'Aberto'), ('PR', 'Em Progresso')], label="Status Inicial")
 
 
-# Função para simular a obtenção do perfil (A SER REMOVIDO)
 def get_user_profile(user):
-    # Simula a criação de um perfil fake para o usuário logado
-    # Na implementação real, use: return user.userprofile
     if not hasattr(user, 'userprofile'):
         setattr(user, 'userprofile', FakeUserProfile(user))
     return user.userprofile
@@ -244,8 +235,6 @@ def editar_perfil_view(request: HttpRequest):
             form = UserProfileForm(request.POST) 
             if form.is_valid():
                 
-                # CORREÇÃO CRÍTICA: Usando .get() para evitar KeyError e garantir segurança.
-                # Se o campo não foi preenchido ou não existia no POST, o valor será None/string vazia.
                 payload = {
                     "username": user_data.get('username'), 
                     "email": form.cleaned_data.get('email', user_data.get('email')),
@@ -421,7 +410,6 @@ def criar_projeto_view(request: HttpRequest):
         if form.is_valid():
             # 1. Obter dados limpos e preparar o payload
             titulo = form.cleaned_data['titulo']
-            # O campo 'proposito' do formulário contém a descrição completa do usuário, que é o 'proposito' para a API
             proposito = form.cleaned_data['proposito'] 
 
             endpoint = f"{API_BASE_URL}/projetos/"
@@ -463,7 +451,7 @@ def editar_projeto_view(request: HttpRequest, projeto_id):
         return redirect('habilidades:login')
 
     # 1. Obter dados do projeto existente (GET)
-    project_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}" # ASSUMINDO QUE EXISTE UMA ROTA GET POR ID
+    project_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}"
     
     try:
         response = requests.get(project_endpoint, timeout=10)
@@ -621,10 +609,10 @@ def lista_projetos_view(request: HttpRequest):
     
     return render(request, 'habilidades/lista_projetos.html', context)
 
-
 def detalhes_projeto_view(request: HttpRequest, projeto_id):
     """
     Busca os detalhes de um projeto, seu owner, colaboradores E as estatísticas de avaliação.
+    Garante que o owner seja carregado de forma robusta para o template.
     """
     user_id = request.session.get('user_id')
     
@@ -636,9 +624,9 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
             user_id = None
     
     projeto = None
-    owner = None
+    owner = None # Inicializado como None
     colaboradores = []
-    avaliacoes_stats = None # Inicializa o novo campo para estatísticas
+    avaliacoes_stats = None
     usuario_e_colaborador = False
     is_owner = False
     
@@ -646,7 +634,7 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
         # ENDPOINTS
         project_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}"
         colaboradores_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/colaboradores"
-        avaliacoes_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/avaliacoes" # NOVO ENDPOINT
+        avaliacoes_endpoint = f"{API_BASE_URL}/projetos/{projeto_id}/avaliacoes"
 
         # 1. Busca detalhes do Projeto (GET /projetos/{id})
         projeto_response = requests.get(project_endpoint, timeout=10)
@@ -660,13 +648,23 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
             return redirect('habilidades:lista_projetos')
 
 
-        # 2. Busca detalhes do Owner
+        # 2. Busca detalhes do Owner (CORREÇÃO DE ROBUSTEZ AQUI)
         owner_id = projeto.get('owner_id')
         if owner_id:
             owner_endpoint = f"{API_BASE_URL}/usuarios/{owner_id}"
-            owner_response = requests.get(owner_endpoint, timeout=10)
-            if owner_response.status_code == 200:
-                owner = owner_response.json()
+            try:
+                owner_response = requests.get(owner_endpoint, timeout=10)
+                # Verifica se a resposta foi bem sucedida antes de atribuir a 'owner'
+                if owner_response.status_code == 200:
+                    owner = owner_response.json()
+                else:
+                    # Se houver erro (ex: 404, 500) a variável 'owner' permanece None, 
+                    # mas o erro não interrompe o fluxo principal da view.
+                    print(f"AVISO: Falha ao carregar Owner {owner_id}. Status: {owner_response.status_code}")
+            except requests.exceptions.RequestException as e:
+                # Se houver erro de conexão/timeout, 'owner' permanece None.
+                print(f"ERRO: Conexão falhou ao carregar Owner {owner_id}. Detalhe: {e}")
+
         
         # 3. Busca de Colaboradores
         colaboradores_response = requests.get(colaboradores_endpoint, timeout=10)
@@ -674,13 +672,13 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
             colaboradores = colaboradores_response.json()
             
             if user_id is not None:
-                # Checagem de Participação (Se o usuário logado está na lista de colaboradores)
+                # Checagem de Participação
                 for colaborador in colaboradores:
                     if colaborador.get('id') == user_id: 
                         usuario_e_colaborador = True
                         break
         
-        # 4. Busca de Estatísticas de Avaliação (NOVO)
+        # 4. Busca de Estatísticas de Avaliação
         avaliacoes_response = requests.get(avaliacoes_endpoint, timeout=10)
         if avaliacoes_response.status_code == 200:
             avaliacoes_stats = avaliacoes_response.json()
@@ -698,14 +696,13 @@ def detalhes_projeto_view(request: HttpRequest, projeto_id):
         
     context = {
         'projeto': projeto,
-        'owner': owner,
+        'owner': owner, 
         'colaboradores': colaboradores,
-        'avaliacoes_stats': avaliacoes_stats, # Passa as estatísticas para o template
+        'avaliacoes_stats': avaliacoes_stats,
         'usuario_e_colaborador': usuario_e_colaborador, 
         'is_owner': is_owner,
         'projeto_id': projeto_id,
         'participa_do_projeto': participa_do_projeto,
-        # Define o link para o botão "Avaliar Projeto"
         'link_avaliar': reverse('habilidades:avaliar_projeto', kwargs={'project_id': projeto_id}) if participa_do_projeto else None,
     }
     
@@ -769,15 +766,12 @@ def busca_habilidade_view(request: HttpRequest):
     resultados_usuarios = []
     resultados_projetos = []
     
-    # 1. Montagem do Endpoint de Busca (Assumindo que a rota GET /api/v1/ é a rota de busca)
-    # ATENÇÃO: Se esta URL não funcionar, ela precisa ser ajustada para a rota real de busca na API.
     endpoint_busca = f"{API_BASE_URL}/" 
     
     params = {}
     if termo_busca:
         params['termo'] = termo_busca
     if campus_filtro:
-        # A API pode esperar uma lista ou uma string separada por vírgula. Vamos enviar como lista (múltiplos 'campus=X')
         params['campus'] = campus_filtro 
     
     try:
@@ -786,12 +780,7 @@ def busca_habilidade_view(request: HttpRequest):
             response = requests.get(endpoint_busca, params=params, timeout=10)
             
             if response.status_code == 200:
-                # Vamos assumir que a API de busca retorna um JSON que contém duas listas: users e projects.
-                # Se a API retornar apenas uma lista combinada, o parsing precisará de ajuste.
                 dados = response.json()
-                
-                # Supondo que a API retorna dados_combinados. Vamos simular a separação:
-                # (AJUSTE NECESSÁRIO: Substitua esta simulação pelo parsing real da sua API)
                 if isinstance(dados, list):
                     # Se a API retornar uma lista simples, assumimos que são usuários (ou projetos)
                     resultados_usuarios = [item for item in dados if 'email' in item] # Heurística simples
@@ -1044,7 +1033,6 @@ class AvaliacaoProjetoForm(forms.Form):
         label="Comentários Adicionais (Feedback opcional)"
     )
 
-# --- ADICIONE ESTA FUNÇÃO EM habilidades/views.py ---
 
 def get_user_id_and_token(request):
     """
@@ -1067,11 +1055,7 @@ def avaliar_projeto_view(request: HttpRequest, project_id):
         messages.error(request, 'Você precisa estar logado para avaliar projetos.')
         return redirect('habilidades:login')
 
-    # A API deve receber o Authorization Bearer Token, mas como não temos o token JWT aqui,
-    # assumimos que o backend valida o ID e afiliação de outras formas (ou vamos improvisar o header).
     headers = {'Content-Type': 'application/json'}
-    # Se você estivesse usando um token JWT para o frontend:
-    # headers['Authorization'] = f'Bearer {user_token}' 
 
     # 1. Tentar obter detalhes do projeto (Para renderizar o título)
     project_endpoint = f"{API_BASE_URL}/projetos/{project_id}"
@@ -1095,8 +1079,6 @@ def avaliar_projeto_view(request: HttpRequest, project_id):
     if request.method == 'POST':
         form = AvaliacaoProjetoForm(request.POST)
         if form.is_valid():
-            # 2. Montar o payload (Nota, Métrica Textual e Comentário)
-            # O ID do avaliador e do projeto são implícitos na URL e no contexto de autenticação.
             payload = {
                 "nota_geral": int(form.cleaned_data['nota_geral']),
                 "metrica_textual": form.cleaned_data['metrica_textual'].lower(),

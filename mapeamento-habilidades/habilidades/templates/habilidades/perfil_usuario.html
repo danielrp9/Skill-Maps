@@ -23,7 +23,7 @@
             <div class="flex flex-col">
                 <h1 class="text-3xl font-bold">Perfil de {{ usuario.username }}</h1>
                 <p class="text-text-light/70 dark:text-text-dark/70 text-sm">Visualizando perfil. ID: {{ usuario.id }}</p>
-            </div>
+            </div> 
             
             {% if is_current_user %}
                 <a href="{% url 'habilidades:editar_perfil' %}" class="flex items-center justify-center gap-1 overflow-hidden rounded-lg h-10 px-4 bg-secondary text-white text-sm font-bold tracking-wide transition-colors hover:bg-secondary/80">
