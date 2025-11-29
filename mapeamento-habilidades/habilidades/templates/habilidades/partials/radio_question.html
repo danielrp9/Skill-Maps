@@ -1,0 +1,18 @@
+<div class="mb-6">
+    <label class="block text-base font-semibold mb-3 text-gray-900 dark:text-gray-100">
+        {{ field.label }}
+    </label>
+    
+    {% if field.errors %}
+        <p class="text-red-500 text-sm mb-2">{{ field.errors.as_text }}</p>
+    {% endif %}
+
+    <div class="flex flex-wrap gap-3">
+        {% for radio in field %}
+            <span class="radio-option">
+                {{ radio.tag }} <label for="{{ radio.id_for_label }}" class="custom-radio-label">
+                    {{ radio.choice_label }} </label>
+            </span>
+        {% endfor %}
+    </div>
+</div>

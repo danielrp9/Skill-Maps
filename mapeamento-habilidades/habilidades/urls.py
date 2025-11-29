@@ -1,5 +1,4 @@
-# Arquivo: /mapeamento-habilidades/habilidades/urls.py
-# (MANTIDO ORIGINALMENTE)
+# Arquivo: /mapeamento-habilidades/habilidades/urls.py (CORRIGIDO)
 
 from django.urls import path
 from . import views
@@ -14,13 +13,16 @@ urlpatterns = [
     path('busca/', views.busca_habilidade_view, name='busca_habilidade'),
     path('projetos/', views.lista_projetos_view, name='lista_projetos'),
     
-    # Rota para Criar Novo Projeto 
+    # Rotas de Projeto
     path('projetos/novo/', views.criar_projeto_view, name='criar_projeto'), 
     path('projetos/<int:projeto_id>/', views.detalhes_projeto_view, name='detalhes_projeto'),
     path('projetos/<int:projeto_id>/participar/', views.participar_projeto_view, name='participar_projeto'),
     path('projetos/<int:projeto_id>/gerenciar/', views.gerenciar_projeto_view, name='gerenciar_projeto'),
     path('projetos/<int:projeto_id>/editar/', views.editar_projeto_view, name='editar_projeto'),
-    path('projeto/<int:project_id>/avaliar/', views.avaliar_projeto_view, name='avaliar_projeto'),
+    
+    # Rota de Avaliação (CORRIGIDA: usa <int:projeto_id> e remove duplicidade)
+    # A view associada DEVE receber o parâmetro como 'projeto_id'
+    path('projeto/<int:projeto_id>/avaliar/', views.avaliar_projeto_view, name='avaliar_projeto'),
     
     path('comunidade/', views.comunidade_view, name='comunidade'),
 

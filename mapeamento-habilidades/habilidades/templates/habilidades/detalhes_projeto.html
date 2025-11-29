@@ -11,7 +11,7 @@
     {% if messages %}
         <div class="w-full mb-4 px-4">
         {% for message in messages %}
-            <div class="p-4 bg-danger/10 text-danger border border-danger/20 rounded-lg">{{ message }}</div>
+            <div class="p-4 bg-red-100 text-red-800 border border-red-200 rounded-lg">{{ message }}</div>
         {% endfor %}
         </div>
     {% else %}
@@ -22,59 +22,60 @@
 {% if messages %}
     <div class="w-full mb-4 px-4">
     {% for message in messages %}
-        <div class="p-4 {% if message.tags == 'error' or message.tags == 'warning' %}bg-danger/10 text-danger border border-danger/20{% else %}bg-green-100 text-green-800 border border-green-200{% endif %} rounded-lg">{{ message }}</div>
+        <div class="p-4 {% if message.tags == 'error' or message.tags == 'warning' %}bg-red-100 text-red-800 border border-red-200{% else %}bg-green-100 text-green-800 border border-green-200{% endif %} rounded-lg">{{ message }}</div>
     {% endfor %}
     </div>
 {% endif %}
 
 <div class="flex flex-wrap gap-2 pb-6">
-<a class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium leading-normal hover:underline" href="{% url 'habilidades:index' %}">Home</a>
-<span class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium leading-normal">/</span>
-<a class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium leading-normal hover:underline" href="{% url 'habilidades:lista_projetos' %}">Projetos</a>
-<span class="text-text-light-secondary dark:text-text-dark-secondary text-sm font-medium leading-normal">/</span>
-<span class="text-text-light-primary dark:text-text-dark-primary text-sm font-medium leading-normal">{{ projeto.titulo }}</span>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:underline" href="{% url 'habilidades:index' %}">Home</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+<a class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal hover:underline" href="{% url 'habilidades:lista_projetos' %}">Projetos</a>
+<span class="text-gray-500 dark:text-gray-400 text-sm font-medium leading-normal">/</span>
+<span class="text-gray-900 dark:text-white text-sm font-medium leading-normal">{{ projeto.titulo }}</span>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 <div class="lg:col-span-2 flex flex-col gap-8">
 <div class="flex flex-col gap-2">
 <p class="text-4xl lg:text-5xl font-black leading-tight tracking-[-0.033em]">{{ projeto.titulo }}</p>
-<p class="text-text-light-secondary dark:text-text-dark-secondary">
+<p class="text-gray-500 dark:text-gray-400">
     Criado por 
     {% if owner %}
-        <a class="font-medium underline" href="{% url 'habilidades:perfil_usuario' usuario_id=owner.id %}">{{ owner.username }}</a>
+        <a class="font-medium underline text-primary" href="{% url 'habilidades:perfil_usuario' usuario_id=owner.id %}">{{ owner.username }}</a>
     {% else %}
         (ID {{ projeto.owner_id }})
     {% endif %}
 </p>
 </div>
 <div>
-<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] mb-3">Descrição/Propósito</h2>
-<p class="text-base font-normal leading-relaxed text-text-light-primary/80 dark:text-text-dark-primary/80 whitespace-pre-wrap">
+<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] mb-3 text-gray-900 dark:text-white">Descrição/Propósito</h2>
+<p class="text-base font-normal leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
     {{ projeto.proposito }}
 </p>
 </div>
 <div>
-<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-4">Habilidades Necessárias</h2>
+<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">Habilidades Necessárias</h2>
 <div class="flex flex-wrap gap-3">
     {% if projeto.habilidades_requeridas %}
+        <!-- ATENÇÃO: Se habilidade for string CSV, o filtro personalizado precisa ser carregado -->
         {% for habilidade in projeto.habilidades_requeridas %}
-            <span class="flex items-center justify-center rounded-lg px-3 py-1.5 bg-primary/20 text-text-light-primary dark:text-text-dark-primary text-sm font-medium">{{ habilidade }}</span>
+            <span class="flex items-center justify-center rounded-lg px-3 py-1.5 bg-primary/20 text-gray-900 dark:text-white text-sm font-medium border border-primary/50">{{ habilidade }}</span>
         {% endfor %}
     {% else %}
-        <p class="text-text-light-secondary dark:text-text-dark-secondary">Nenhuma habilidade requerida listada.</p>
+        <p class="text-gray-500 dark:text-gray-400">Nenhuma habilidade requerida listada.</p>
     {% endif %}
 </div>
 </div>
 {% if owner %}
 <div>
-<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-4">Contatos do Criador ({{ owner.username }})</h2>
+<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-4 text-gray-900 dark:text-white">Contatos do Criador ({{ owner.username }})</h2>
 <div class="flex flex-wrap gap-3">
-    <a href="mailto:{{ owner.email }}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-gray-100 dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-bold hover:bg-gray-200 transition-colors">
+    <a href="mailto:{{ owner.email }}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm font-bold text-gray-800 dark:text-gray-200 hover:bg-gray-200 transition-colors">
         <span class="material-symbols-outlined mr-2">mail</span>
         Email
     </a>
-    <a href="{% url 'habilidades:perfil_usuario' usuario_id=owner.id %}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-gray-100 dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-bold hover:bg-gray-200 transition-colors">
+    <a href="{% url 'habilidades:perfil_usuario' usuario_id=owner.id %}" class="flex items-center justify-center rounded-lg h-10 px-4 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-sm font-bold text-gray-800 dark:text-gray-200 hover:bg-gray-200 transition-colors">
         <span class="material-symbols-outlined mr-2">person</span>
         Ver Perfil
     </a>
@@ -85,64 +86,62 @@
 
 <aside class="lg:col-span-1">
 <div class="sticky top-24">
-<div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-xl p-6 flex flex-col gap-6">
+<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/80 rounded-xl p-6 flex flex-col gap-6">
 <div class="flex items-center gap-3">
     <div class="flex items-center gap-2 text-sm font-medium px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full">
         <span class="size-2 rounded-full bg-green-500"></span>
         {{ projeto.status|default:"Indefinido" }}
     </div>
-    <p class="text-sm font-medium text-text-light-secondary dark:text-text-dark-secondary">
+    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
         {{ colaboradores|length }} Colaborador{% if colaboradores|length != 1 %}es{% endif %}
     </p>
 </div>
 
 <div class="flex flex-col gap-4 text-sm">
     <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-text-light-secondary dark:text-text-dark-secondary">location_on</span>
+        <span class="material-symbols-outlined mt-0.5 text-gray-500 dark:text-gray-400">location_on</span>
         <div>
-            <p class="font-semibold">Campus (Geolocalização)</p>
-<p class="text-text-light-primary/80 dark:text-text-dark-primary/80">
-    {{ projeto.campus|default:"Não informado" }}
-</p>
+            <p class="font-semibold text-gray-900 dark:text-white">Campus (Geolocalização)</p>
+            <p class="text-gray-700 dark:text-gray-300">
+                <!-- CORREÇÃO DE GEOLOCALIZAÇÃO APLICADA -->
+                {{ projeto.campus|default:owner.campus|default:"Não informado" }}
+            </p>
         </div>
     </div>
     <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-text-light-secondary dark:text-text-dark-secondary">calendar_today</span>
+        <span class="material-symbols-outlined mt-0.5 text-gray-500 dark:text-gray-400">calendar_today</span>
         <div>
-            <p class="font-semibold">Criado em</p>
-            <p class="text-text-light-primary/80 dark:text-text-dark-primary/80">
+            <p class="font-semibold text-gray-900 dark:text-white">Criado em</p>
+            <p class="text-gray-700 dark:text-gray-300">
                 {{ projeto.created_at|default:"N/A" }}
             </p>
         </div>
     </div>
     <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-text-light-secondary dark:text-text-dark-secondary">person</span>
+        <span class="material-symbols-outlined mt-0.5 text-gray-500 dark:text-gray-400">person</span>
         <div>
-            <p class="font-semibold">Owner ID</p>
-            <p class="text-text-light-primary/80 dark:text-text-dark-primary/80">{{ projeto.owner_id }}</p>
+            <p class="font-semibold text-gray-900 dark:text-white">Owner ID</p>
+            <p class="text-gray-700 dark:text-gray-300">{{ projeto.owner_id }}</p>
         </div>
     </div>
     <div class="flex items-start gap-3">
-        <span class="material-symbols-outlined mt-0.5 text-text-light-secondary dark:text-text-dark-secondary">tag</span>
+        <span class="material-symbols-outlined mt-0.5 text-gray-500 dark:text-gray-400">tag</span>
         <div>
-            <p class="font-semibold">ID do Projeto</p>
-            <p class="text-text-light-primary/80 dark:text-text-dark-primary/80">{{ projeto.id }}</p>
+            <p class="font-semibold text-gray-900 dark:text-white">ID do Projeto</p>
+            <p class="text-gray-700 dark:text-gray-300">{{ projeto.id }}</p>
         </div>
     </div>
 </div>
 
-{% if is_owner %}
-    <div class="border-t border-border-light dark:border-border-dark pt-4 flex flex-col gap-3">
-        <p class="font-semibold text-sm text-text-light-secondary dark:text-text-dark-secondary">Controles do Projeto:</p>
-        
-        <a href="{% url 'habilidades:editar_projeto' projeto_id=projeto.id %}" class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-secondary text-white text-sm font-bold transition-colors hover:bg-secondary/80">
+<!-- AÇÕES PRINCIPAIS CORRIGIDAS (Botão Avaliar e Botão Participar/Sair) -->
+<div class="border-t border-gray-200 dark:border-gray-700 pt-4 flex flex-col gap-3">
+    
+    {% if is_owner %}
+        <!-- AÇÕES PARA O OWNER -->
+        <p class="font-semibold text-sm text-gray-500 dark:text-gray-400">Controles do Projeto:</p>
+        <a href="{% url 'habilidades:editar_projeto' projeto_id=projeto.id %}" class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-primary text-gray-900 text-sm font-bold transition-colors hover:opacity-90">
             <span class="material-symbols-outlined mr-2 !text-lg">edit</span>
             Editar Projeto
-        </a>
-        
-        <a href="#" class="w-full flex items-center justify-center rounded-lg h-10 px-4 bg-gray-200 text-text-light dark:bg-gray-700 dark:text-text-dark text-sm font-bold transition-colors hover:bg-gray-300 dark:hover:bg-gray-600">
-            <span class="material-symbols-outlined mr-2 !text-lg">history</span>
-            Histórico de Alterações
         </a>
         
         <form method="POST" action="{% url 'habilidades:gerenciar_projeto' projeto_id=projeto.id %}" onsubmit="return confirm('Tem certeza que deseja apagar este projeto? Esta ação é irreversível.');">
@@ -153,54 +152,67 @@
                 Apagar Projeto
             </button>
         </form>
-    </div>
-    
-    <button disabled class="w-full flex min-w-[84px] items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-gray-400 text-background-dark text-base font-bold leading-normal tracking-[0.015em] opacity-70 cursor-not-allowed">
-        <span class="truncate">Você é o Criador</span>
-    </button>
+        
+        <button disabled class="w-full flex min-w-[84px] items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-gray-400 text-gray-900 text-base font-bold leading-normal tracking-[0.015em] opacity-70 cursor-not-allowed">
+            <span class="truncate">Você é o Criador</span>
+        </button>
 
-{% elif participa_do_projeto %}
-    <form method="POST" action="{% url 'habilidades:participar_projeto' projeto_id=projeto.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="acao" value="sair"> 
-        <button type="submit" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-red-600 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-red-700 transition-colors">
-            <span class="truncate">Sair do Projeto</span>
-        </button>
-    </form>
-{% else %}
-    <form method="POST" action="{% url 'habilidades:participar_projeto' projeto_id=projeto.id %}">
-        {% csrf_token %}
-        <button type="submit" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
-            <span class="truncate">Quero Participar</span>
-        </button>
-    </form>
-{% endif %}
+    {% else %}
+        
+        <!-- BOTÃO DE AVALIAÇÃO (DESTAQUE - Aparece para participantes) -->
+        {% if participa_do_projeto and link_avaliar %}
+            <a href="{{ link_avaliar }}" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-yellow-500 text-gray-900 text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity mb-3">
+                <span class="material-symbols-outlined mr-2 !text-lg">rate_review</span>
+                Avaliar Projeto
+            </a>
+        {% endif %}
+
+        <!-- AÇÕES DE PARTICIPAÇÃO -->
+        {% if participa_do_projeto %}
+            <form method="POST" action="{% url 'habilidades:participar_projeto' projeto_id=projeto.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="sair"> 
+                <button type="submit" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-red-600 text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-red-700 transition-colors">
+                    <span class="truncate">Sair do Projeto</span>
+                </button>
+            </form>
+        {% else %}
+            <form method="POST" action="{% url 'habilidades:participar_projeto' projeto_id=projeto.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="participar">
+                <button type="submit" class="w-full flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-4 bg-primary text-gray-900 text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+                    <span class="truncate">Quero Participar</span>
+                </button>
+            </form>
+        {% endif %}
+    {% endif %}
 </div>
 </div>
 </aside>
 </div>
 
-<div class="mt-12 lg:mt-16 border-t border-border-light dark:border-border-dark pt-8">
-<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-6">Opiniões sobre o Projeto</h2>
+<div class="mt-12 lg:mt-16 border-t border-gray-200 dark:border-gray-700 pt-8">
+<h2 class="text-2xl font-bold leading-tight tracking-[-0.015em] pb-6 text-gray-900 dark:text-white">Opiniões sobre o Projeto</h2>
 <div class="flex flex-col gap-6">
+    <!-- ATENÇÃO: ESTA SEÇÃO AINDA É MOCK. PRECISA DA INTEGRAÇÃO REAL DE AVALIAÇÕES -->
     {% for feedback in feedbacks %}
-        <div class="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-xl p-5">
+        <div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/80 rounded-xl p-5">
             <div class="flex items-center gap-3 mb-3">
-                <div class="size-10 bg-center bg-no-repeat aspect-square bg-cover rounded-full" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuASQCKUr671UNUWiNmmHSfKJGajZwxv3inAedXz6ml1FfDgrEly3JexrHxMwabT3kGuHk7ht9owoFQXlMJIvbq4hPbhMN3RurWH0pax5hpOXQCLiMRBXzf6aur2k1mzJUCMdaaQ41un7veoHshFo2p-DDhrVIZqV6ESe_iXsA7FictNXJeSX43tVUKjOSAuIVJNbxlNOim_nDeiz8nXVgs5lC8wo5ZfFuA5LBq8FWnmVbZOpQHaSWFiBDeYdLoJ0rAxONWb3FsXo08B");'></div>
+                <div class="size-10 bg-center bg-no-repeat aspect-square bg-cover rounded-full" style='background-image: url("https://placehold.co/128x128/13ec5b/0d1b12?text=F");'></div>
                 <div>
-                    <p class="font-semibold">{{ feedback.autor }}</p>
-                    <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary">Agora</p>
+                    <p class="font-semibold text-gray-900 dark:text-white">{{ feedback.autor }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Agora</p>
                 </div>
             </div>
-            <p class="text-sm leading-relaxed text-text-light-primary/80 dark:text-text-dark-primary/80">{{ feedback.texto }}</p>
+            <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300">{{ feedback.texto }}</p>
         </div>
     {% endfor %}
 
     <div class="mt-4">
-        <h3 class="text-lg font-bold mb-3">Deixe sua opinião</h3>
+        <h3 class="text-lg font-bold mb-3 text-gray-900 dark:text-white">Deixe sua opinião</h3>
         <div class="flex flex-col gap-4">
-            <textarea class="form-textarea w-full min-h-24 resize-y rounded-lg text-text-light-primary dark:text-text-dark-primary focus:outline-0 focus:ring-2 focus:ring-primary/50 border-border-light dark:border-border-dark bg-background-light dark:bg-card-dark placeholder:text-text-light-secondary/70 dark:placeholder:text-text-dark-secondary/70 text-base font-normal leading-normal" placeholder="Escreva seu comentário aqui..."></textarea>
-            <button class="self-start flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-background-dark text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+            <textarea class="form-textarea w-full min-h-24 resize-y rounded-lg text-gray-900 dark:text-gray-100 focus:ring-primary/50 border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-base font-normal leading-normal" placeholder="Escreva seu comentário aqui..."></textarea>
+            <button class="self-start flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-primary text-gray-900 text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
                 <span class="truncate">Enviar Comentário</span>
             </button>
         </div>

@@ -1,4 +1,4 @@
-{% load custom_filters %}
+{% load project_tags %}
 
 <!DOCTYPE html>
 <html class="light" lang="pt-br">
@@ -20,8 +20,8 @@
                     "primary": "#13ec5b",
                     "background-light": "#f6f8f6",
                     "background-dark": "#102216",
-                    "border-light": "#e5e7eb", /* Adicionado para consistência de bordas */
-                    "border-dark": "#374151",  /* Adicionado para consistência de bordas */
+                    "border-light": "#e5e7eb",
+                    "border-dark": "#374151",
                 },
                 fontFamily: {
                     "display": ["Inter", "sans-serif"]
@@ -41,26 +41,11 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* Estilização para os radio buttons do Django seguirem o has-[:checked] */
-    .radio-option {
-        /* Garante que o span que envolve o label seja flexível */
-        display: inline-flex; 
-        margin-right: 0.5rem; /* Espaçamento entre as opções */
-    }
-    .radio-option input[type="radio"] {
-        /* Esconde o input real, confiando no estilo do label */
-        opacity: 0;
-        width: 0;
-        height: 0;
-        position: absolute;
-    }
-    .custom-radio-label {
-        /* Estilos da sua base para o radio button */
-        @apply text-sm font-medium leading-normal flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 h-11 text-gray-800 dark:text-gray-200 cursor-pointer transition-all duration-200 ease-in-out;
-    }
-    /* Classe aplicada quando o radio button está checado */
-    .radio-option input[type="radio"]:checked + .custom-radio-label {
-        @apply border-[3px] border-primary text-primary dark:text-primary font-semibold;
+        
+
+    /* Estilo para agrupar as perguntas */
+    .question-group {
+        @apply bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/80;
     }
 </style>
 </head>
@@ -71,7 +56,11 @@
 <div class="layout-content-container flex flex-col max-w-[960px] flex-1">
 
     <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 px-4 sm:px-10 py-3">
-        </header>
+        <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto_id %}" class="flex items-center text-gray-900 dark:text-gray-100 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined mr-2">arrow_back</span>
+            Voltar ao Projeto
+        </a>
+    </header>
     
     <main class="flex-1 p-4 sm:p-6 lg:p-10">
 
@@ -81,7 +70,7 @@
                     Avaliação do Projeto: **{{ project_title }}**
                 </p>
                 <p class="text-green-700 dark:text-green-400 text-base font-normal leading-normal">
-                    Por favor, avalie sua experiência no projeto abaixo para nos ajudar a melhorar futuras colaborações.
+                    Seu feedback é vital para a comunidade. Por favor, avalie o projeto nas 7 áreas de métricas.
                 </p>
             </div>
         </div>
@@ -106,10 +95,10 @@
                     {% if already_evaluated %}
                         Você já enviou uma avaliação para este projeto.
                     {% elif not can_evaluate %}
-                        Acesso Restrito: Você precisa ser membro do projeto para avaliá-lo.
+                        Acesso Restrito: Você precisa ser membro ou proprietário do projeto para avaliá-lo.
                     {% endif %}
                 </h2>
-                <a href="{% url 'habilidades:detalhes_projeto' projeto_id=project_id %}" class="btn mt-4 inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto_id %}" class="btn mt-4 inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                     Voltar aos Detalhes do Projeto
                 </a>
             </div>
@@ -119,59 +108,98 @@
         <form method="post" class="flex flex-col gap-8">
             {% csrf_token %}
             
-            <div class="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/80">
-                <h1 class="text-gray-900 dark:text-gray-100 text-lg sm:text-xl font-bold leading-tight tracking-[-0.015em] text-left pb-4">
-                    1. {{ form.nota_geral.label }}
-                </h1>
-                {% if form.nota_geral.errors %}
-                    <p class="text-red-500 text-sm mb-2">{{ form.nota_geral.errors.as_text }}</p>
-                {% endif %}
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">1. Clareza e Entendimento</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.clareza_objetivo %}
+                {% include "habilidades/partials/radio_question.html" with field=form.clareza_informacao %}
+                {% include "habilidades/partials/radio_question.html" with field=form.clareza_beneficiarios %}
+            </div>
+
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">2. Relevância Social</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.relevancia_problema %}
+                {% include "habilidades/partials/radio_question.html" with field=form.relevancia_impacto %}
+                {% include "habilidades/partials/radio_question.html" with field=form.relevancia_beneficios %}
+            </div>
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">3. Viabilidade</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.viabilidade_implementacao %}
+                {% include "habilidades/partials/radio_question.html" with field=form.viabilidade_cronograma %}
+                {% include "habilidades/partials/radio_question.html" with field=form.viabilidade_capacidade %}
+            </div>
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">4. Transparência</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.transparencia_verificavel %}
+                {% include "habilidades/partials/radio_question.html" with field=form.transparencia_custos %}
+                {% include "habilidades/partials/radio_question.html" with field=form.transparencia_prestacao %}
+            </div>
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">5. Inovação</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.inovacao_ideias %}
+                {% include "habilidades/partials/radio_question.html" with field=form.inovacao_melhorias %}
+            </div>
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">6. Participação e Inclusão</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.participacao_grupos %}
+                {% include "habilidades/partials/radio_question.html" with field=form.participacao_social %}
+                {% include "habilidades/partials/radio_question.html" with field=form.participacao_colaboracao %}
+            </div>
+
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">7. Sustentabilidade</h2>
+                {% include "habilidades/partials/radio_question.html" with field=form.sustentabilidade_duradouro %}
+                {% include "habilidades/partials/radio_question.html" with field=form.sustentabilidade_recursos %}
+            </div>
+
+            <div class="question-group">
+                <h2 class="text-gray-900 dark:text-gray-100 text-xl font-bold mb-4">8. Avaliação Final e Feedback</h2>
                 
-                <div class="flex flex-wrap gap-3">
-                    {% for radio in form.nota_geral %}
-                        <span class="radio-option">
-                            {{ radio.tag }}
-                            <label for="{{ radio.id_for_label }}" class="custom-radio-label">
-                                {{ radio.choice_label }}
-                            </label>
-                        </span>
-                    {% endfor %}
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100" for="{{ form.nota_geral.id_for_label }}">
+                        {{ form.nota_geral.label }}
+                    </label>
+                    {% if form.nota_geral.errors %}<p class="text-red-500 text-sm mb-2">{{ form.nota_geral.errors.as_text }}</p>{% endif %}
+                    <div class="flex flex-wrap gap-3">
+                        {% for radio in form.nota_geral %}
+                            <span class="radio-option">
+                                {{ radio.tag }}
+                                <label for="{{ radio.id_for_label }}" class="custom-radio-label">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100" for="{{ form.metrica_textual.id_for_label }}">
+                        {{ form.metrica_textual.label }}
+                    </label>
+                    {% if form.metrica_textual.errors %}<p class="text-red-500 text-sm mb-2">{{ form.metrica_textual.errors.as_text }}</p>{% endif %}
+                    <div class="flex flex-wrap gap-3">
+                        {% for radio in form.metrica_textual %}
+                            <span class="radio-option">
+                                {{ radio.tag }}
+                                <label for="{{ radio.id_for_label }}" class="custom-radio-label">
+                                    {{ radio.choice_label }}
+                                </label>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100" for="{{ form.comentario.id_for_label }}">
+                        {{ form.comentario.label }}
+                    </label>
+                    {% if form.comentario.errors %}<p class="text-red-500 text-sm mb-2">{{ form.comentario.errors.as_text }}</p>{% endif %}
+                    {{ form.comentario }}
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/80">
-                <h1 class="text-gray-900 dark:text-gray-100 text-lg sm:text-xl font-bold leading-tight tracking-[-0.015em] text-left pb-4">
-                    2. {{ form.metrica_textual.label }}
-                </h1>
-                 {% if form.metrica_textual.errors %}
-                    <p class="text-red-500 text-sm mb-2">{{ form.metrica_textual.errors.as_text }}</p>
-                {% endif %}
-                
-                <div class="flex flex-wrap gap-3">
-                    {% for radio in form.metrica_textual %}
-                        <span class="radio-option">
-                            {{ radio.tag }}
-                            <label for="{{ radio.id_for_label }}" class="custom-radio-label">
-                                {{ radio.choice_label }}
-                            </label>
-                        </span>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <div class="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/80">
-                <label class="text-gray-900 dark:text-gray-100 text-lg sm:text-xl font-bold leading-tight tracking-[-0.015em] text-left pb-4 block" for="{{ form.comentario.id_for_label }}">
-                    {{ form.comentario.label }}
-                </label>
-                 {% if form.comentario.errors %}
-                    <p class="text-red-500 text-sm mb-2">{{ form.comentario.errors.as_text }}</p>
-                {% endif %}
-                
-                {{ form.comentario }}
-            </div>
             
             <div class="flex justify-end pt-4 gap-4">
-                <a href="{% url 'habilidades:detalhes_projeto' projeto_id=project_id %}" class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-3 text-base font-bold text-gray-800 dark:text-gray-200 shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]">
+                <a href="{% url 'habilidades:detalhes_projeto' projeto_id=projeto_id %}" class="flex items-center justify-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-6 py-3 text-base font-bold text-gray-800 dark:text-gray-200 shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]">
                     Cancelar
                 </a>
                 <button type="submit" class="flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-3 text-base font-bold text-gray-900 shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98]">
